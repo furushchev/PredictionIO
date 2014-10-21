@@ -1,5 +1,7 @@
 class TrainingData(
   val ratings: List[Rating]
+  val users: List[User]
+  val movies: List[Movie]
 ) extends Serializable
 
 class Rating(

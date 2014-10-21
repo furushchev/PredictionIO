@@ -2,9 +2,11 @@ package io.prediction.engines.movierec
 
 import java.io.Serializable
 //import java.util.List
-
+e
 case class TrainingData (
     val ratings: Seq[Rating]
+    val users: Seq[User]
+    var movies: Seq[Movie]
   ) extends Serializable {
 
   override def toString(): String {

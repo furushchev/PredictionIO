@@ -1,5 +1,6 @@
 package io.prediction.engines.movierec
 
+
 import java.io.Serializable
 import java.util.Map
 import org.apache.commons.math3.linear.RealVector

@@ -1,5 +1,6 @@
 package io.prediction.engines.movierec
 
+
 import java.io.Serializable
 
 case class Query (

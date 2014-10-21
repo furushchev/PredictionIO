@@ -6,7 +6,6 @@ import io.prediction.engines.base.HasName
 import org.joda.time.DateTime
 import io.prediction.controller.Params
 import io.prediction.engines.base.DataParams
-
 import java.util.List
 
 case class EventsDataSourceParams(

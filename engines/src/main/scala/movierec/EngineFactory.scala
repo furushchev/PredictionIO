@@ -1,3 +1,5 @@
+package io.prediction.engines.movierec
+
 import io.prediction.controller.IEngineFactory
 import io.prediction.controller.Engine
 

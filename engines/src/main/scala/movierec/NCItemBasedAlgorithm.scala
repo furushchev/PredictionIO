@@ -1,5 +1,6 @@
 package io.prediction.engines.movierec
 
+
 import io.prediction.engines.base.mahout.NCItemBasedAlgorithmModel
 import io.prediction.engines.base
 

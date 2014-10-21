@@ -1,35 +1,3 @@
-<<<<<<< HEAD
-class TrainingData(
-  val ratings: List[Rating]
-  val users: List[User]
-  val movies: List[Movie]
-) extends Serializable
-
-class Rating(
-  val userId: Int
-  val movieId: Int
-  float rating: Float
-) extends Serializable {
-  override def toString = "(" + userId + "," + movieId + ")"
-}
-
-class Movie(
-  val movieId: Int
-  val movieTitle: Int
-  val releaseDate: Date
-  val videoReleaseDate: Date
-  val imdbUrl: String
-  // TODO: decide how to implement genre flags
-) extends Serializable
-
-class User(
-  val userId: Int
-  val age: Int
-  val gender: Char
-  val occupation: String
-  val zipCode: Int
-) extends Serializable
-=======
 package io.prediction.engines.movierec
 
 import java.io.Serializable
@@ -59,6 +27,32 @@ case class TrainingData (
 
     override def toString() = "(" + uid + ", " + mid + ", " + rating + ")"
   }
+
+  case class Movie(
+      val mid: Int
+      val title: Int
+      val releaseDate: Date
+      //val videoReleaseDate: Date
+      val imdbUrl: String
+      // TODO: decide how to implement genre flags
+    ) extends Serializable {
+
+    override def toString() = "Movie: " + title + " ID: " + mid
+                              + " ReleaseDate: " + releaseDate
+                              + " ImdbUrl: " + imdbUrl
+  }
+
+  case class User(
+      val uid: Int
+      val age: Int 
+      val gender: Char
+      val occupation: String
+      val zip: Int
+    ) extends Serializable {
+
+    override def toString(): String = "UserID: " + uid + " Age: " + age
+                                      + " Gender: " + gender + " Occupation: "
+                                      + occupation + " zip: " + zip
+  }
 }
 
->>>>>>> 4d9d0f33df142a393cd1588a623b41eb05899f6e

@@ -8,7 +8,7 @@ import io.prediction.controller.Params
 import io.prediction.engines.base.DataParams
 import java.util.List
 
-case class EventsDataSourceParams(
+case class MovieDataSourceParams(
   /*val appId: Int,
   // default None to include all itypes
   val itypes: Option[Set[String]] = None, // train items with these itypes
@@ -29,7 +29,7 @@ case class EvalParams(
   val queryN: Int = -1
 )
 
-class EventsDataSource(dsp: EventsDataSourceParams)
+class MovieDataSource(dsp: MovieDataSourceParams)
   extends base.EventsDataSource[DataParams, Query, Actual](dsp) {
 
   override def read() {

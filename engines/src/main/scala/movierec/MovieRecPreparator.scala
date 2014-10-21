@@ -1,6 +1,5 @@
 package io.prediction.engines.movierec
 
-
 import io.prediction.engines.base
 
 case class PreparatorParams (

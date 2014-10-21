@@ -21,6 +21,8 @@ case class MovieDataSourceParams(
   override val slidingEval: Option[base.EventsSlidingEvalParams] = None,
   val evalParams: Option[EvalParams] = None*/
     val filePath: String
+    val userFilePath: String
+    val movieFilePath: String
   ) extends base.AbstractEventsDataSourceParams
 
 case class EvalParams(
@@ -35,13 +37,33 @@ class MovieDataSource(dsp: MovieDataSourceParams)
 
   override def read() {
     File ratingFile = new File(dsp.filePath)
-    Scanner = null
+    Scanner sc = null
+
+    File userFile = new File(dsp.userFilePath)
+    Scanner usc = null
+
+    File movieFile = new File(dsp.movieFilePath)
+    Scanner msc = null
 
     try {
       sc = new Scanner(ratingFile)
     } catch (FileNotFoundException e){
       println("Caught FileNotFoundException " + e.getMessage())
       System.exit(1)
+    }
+
+    try {
+      usc = new Scanner(userFile)
+    } catch (FileNotFoundException e) {
+      println("Caught FileNotFoundException " + e.getMessage())
+      System.exit(1)
+    }
+
+    try {
+      msc = new Scanner(movieFile)
+    } catch (FileNotFoundException e) {
+      println("Caught FileNotFoundException " + e.getMessage())
+      System.exit(1)      
     }
 
     List[TrainingData#Rating] ratings = new ArrayList[TrainingData#Rating]()
@@ -62,6 +84,45 @@ class MovieDataSource(dsp: MovieDataSourceParams)
       }
     }
 
+    List[TrainingData#User] users = new ArrayList[TrainingData#Users]()
+
+    while (usc.hasNext()) {
+      var line = usc.nextLine()
+      var tokens: String[] = line.split("\\|")
+
+      try {
+        TrainingData#User user = new TrainingData#User(
+          Integer.parseInt(tokens[0]),
+          Integer.parseInt(tokens[1]),
+          tokens[2],
+          tokens[3]),
+          Integer.parseInt(tokens[4]))
+        users.add(user)
+      } catch (Exception e) {
+        println("Can't parse user file. Caught Exception: " + e.getMessage())
+        System.exit(1)
+      }
+    }
+
+    List[TrainingData#Movie] movies = new ArrayList[TrainingData#Movie]()
+
+    while (msc.hasNext()) {
+      var line = msc.nextLine()
+      var tokens: String[] = line.split("\\|")
+
+      try {
+        TrainingData#Movie movie = new TrainingData#Movie(
+          Integer.parseInt(tokens[0]),
+          token[1],
+          Integer.parseInt(tokens[2]), // TODO release date parsing
+          token[3]) // TODO: URL parsing
+        // TODO: Add genre
+        movies.add(movie)
+      } catch (Exception e) {
+        println("Can't parse movie file. Caught Exception: " + e.getMessage())
+        System.exit(1)
+      }
+    }
       /*List<Tuple3<Object, TrainingData, Iterable<Tuple2<Query, Object>>>> data =
         new ArrayList<Tuple3<Object, TrainingData, Iterable<Tuple2<Query, Object>>>>();
 
@@ -71,7 +132,7 @@ class MovieDataSource(dsp: MovieDataSourceParams)
         new ArrayList<Tuple2<Query, Object>>()
       ));*/
 
-    val data = TrainingData(ratings);
+    val data = TrainingData(ratings, users, movies);
     return data;
   }
 

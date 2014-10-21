@@ -6,6 +6,7 @@ import io.prediction.engines.base.HasName
 import org.joda.time.DateTime
 import io.prediction.controller.Params
 import io.prediction.engines.base.DataParams
+
 import java.util.List
 
 case class MovieDataSourceParams(
@@ -19,49 +20,48 @@ case class MovieDataSourceParams(
   val attributeNames: base.AttributeNames,
   override val slidingEval: Option[base.EventsSlidingEvalParams] = None,
   val evalParams: Option[EvalParams] = None*/
-  val filePath: String
-) extends base.AbstractEventsDataSourceParams
+    val filePath: String
+  ) extends base.AbstractEventsDataSourceParams
 
 case class EvalParams(
-  // The variable n in Query, i.e. the number of items requested from the
-  // ItemRec prediction engine. Default value is -1, it will use the same number
-  // as actions of that user.
-  val queryN: Int = -1
-)
+    // The variable n in Query, i.e. the number of items requested from the
+    // ItemRec prediction engine. Default value is -1, it will use the same number
+    // as actions of that user.
+    val queryN: Int = -1
+  )
 
 class MovieDataSource(dsp: MovieDataSourceParams)
   extends base.EventsDataSource[DataParams, Query, Actual](dsp) {
 
   override def read() {
-      File ratingFile = new File(dsp.filePath)
-      Scanner = null
+    File ratingFile = new File(dsp.filePath)
+    Scanner = null
+
+    try {
+      sc = new Scanner(ratingFile)
+    } catch (FileNotFoundException e){
+      println("Caught FileNotFoundException " + e.getMessage())
+      System.exit(1)
+    }
+
+    List[TrainingData#Rating] ratings = new ArrayList[TrainingData#Rating]()
+
+    while (sc.hasNext()) {
+      var line = sc.nextLine()
+      var tokens: String[] = line.split("[\t,]")
 
       try {
-          sc = new Scanner(ratingFile)
-      } catch (FileNotFoundException e){
-          println("Caught FileNotFoundException " + e.getMessage())
-          System.exit(1)
+        TrainingData#Rating rating = new TrainingData#Rating(
+          Integer.parseInt(tokens[0]),
+          Integer.parseInt(tokens[1]),
+          Float.parseFloat(tokens[2]))
+        ratings.add(rating)
+      } catch (Exception e) {
+        println("Can't parse rating file. Caught Exception: " + e.getMessage())
+        System.exit(1)
       }
+    }
 
-      List[TrainingData#Rating] ratings = new ArrayList[TrainingData#Rating]()
-
-      while (sc.hasNext()) {
-        var line = sc.nextLine()
-        var tokens: String[] = line.split("[\t,]")
-
-        try {
-          TrainingData#Rating rating = new TrainingData#Rating(
-              Integer.parseInt(tokens[0]),
-              Integer.parseInt(tokens[1]),
-              Float.parseFloat(tokens[2]))
-          ratings.add(rating)
-        } catch (Exception e) {
-          println("Can't parse rating file. Caught Exception: " + e.getMessage())
-          System.exit(1)
-        }
-      }
-
-//??????????????????
       /*List<Tuple3<Object, TrainingData, Iterable<Tuple2<Query, Object>>>> data =
         new ArrayList<Tuple3<Object, TrainingData, Iterable<Tuple2<Query, Object>>>>();
 
@@ -71,9 +71,8 @@ class MovieDataSource(dsp: MovieDataSourceParams)
         new ArrayList<Tuple2<Query, Object>>()
       ));*/
 
-      val data = TrainingData(ratings);
- 
-      return data;
+    val data = TrainingData(ratings);
+    return data;
   }
 
  /* override def generateQueryActualSeq(

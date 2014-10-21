@@ -17,6 +17,7 @@ package io.prediction.tools
 
 import io.prediction.controller.Utils
 import io.prediction.core.BuildInfo
+import io.prediction.data.storage.Appkey
 import io.prediction.data.storage.EngineManifest
 import io.prediction.data.storage.EngineManifestSerializer
 import io.prediction.data.storage.Storage
@@ -40,6 +41,8 @@ import java.nio.file.Files
 case class ConsoleArgs(
   common: CommonArgs = CommonArgs(),
   build: BuildArgs = BuildArgs(),
+  appkey: AppkeyArgs = AppkeyArgs(),
+  eventServer: EventServerArgs = EventServerArgs(),
   commands: Seq[String] = Seq(),
   batch: String = "Transient Lazy Val",
   metricsClass: Option[String] = None,
@@ -68,6 +71,16 @@ case class BuildArgs(
   sbtExtra: Option[String] = None,
   sbtAssemblyPackageDependency: Boolean = false,
   sbtClean: Boolean = false)
+
+case class AppkeyArgs(
+  appkey: String = "",
+  appid: Int = 0,
+  events: Seq[String] = Seq())
+
+case class EventServerArgs(
+  enabled: Boolean = false,
+  ip: String = "localhost",
+  port: Int = 7070)
 
 object Console extends Logging {
   val distFilename = "DIST"
@@ -249,7 +262,16 @@ object Console extends Logging {
           } text("IP to bind to. Default: localhost"),
           opt[Int]("port") action { (x, c) =>
             c.copy(port = x)
-          } text("Port to bind to. Default: 8000")
+          } text("Port to bind to. Default: 8000"),
+          opt[Unit]("feedback") action { (_, c) =>
+            c.copy(eventServer = c.eventServer.copy(enabled = true))
+          } text("Enable feedback loop to event server."),
+          opt[String]("event-server-ip") action { (x, c) =>
+            c.copy(eventServer = c.eventServer.copy(ip = x))
+          } text("Event server IP. Default: localhost"),
+          opt[Int]("event-server-port") action { (x, c) =>
+            c.copy(eventServer = c.eventServer.copy(port = x))
+          } text("Event server port. Default: 7070")
         )
       note("")
       cmd("undeploy").
@@ -353,6 +375,45 @@ object Console extends Logging {
             c.copy(build = c.build.copy(sbtAssemblyPackageDependency = true))
           } text("Build dependencies assembly.")
         )
+      note("")
+      cmd("appkey").
+        text("Manage app keys.\n").
+        action { (_, c) =>
+          c.copy(commands = c.commands :+ "appkey")
+        } children(
+          cmd("new").
+            text("Create a new app key to app ID mapping.").
+            action { (_, c) =>
+              c.copy(commands = c.commands :+ "new")
+            } children(
+              arg[Int]("<appid>") action { (x, c) =>
+                c.copy(appkey = c.appkey.copy(appid = x))
+              } text("The app ID to be mapped."),
+              arg[String]("<event>...") unbounded() action { (x, c) =>
+                c.copy(appkey = c.appkey.copy(events = c.appkey.events :+ x))
+              } text("Event name(s) that are allowed with this key.")
+            ),
+          note(""),
+          cmd("list").
+            text("List all app keys in the system.").
+            action { (_, c) =>
+              c.copy(commands = c.commands :+ "list")
+            } children(
+              opt[Int]("appid") action { (x, c) =>
+                c.copy(appkey = c.appkey.copy(appid = x))
+              } text("Restrict listing to a specific app ID.")
+            ),
+          note(""),
+          cmd("delete").
+            text("Delete an app key.").
+            action { (_, c) =>
+              c.copy(commands = c.commands :+ "delete")
+            } children(
+              arg[String]("<appkey>") action { (x, c) =>
+                c.copy(appkey = c.appkey.copy(appkey = x))
+              } text("The app key to be deleted.")
+            )
+        )
     }
 
     val separatorIndex = args.indexWhere(_ == "--")
@@ -402,6 +463,12 @@ object Console extends Logging {
           run(ca)
         case Seq("dist") =>
           dist(ca)
+        case Seq("appkey", "new") =>
+          appkeyNew(ca)
+        case Seq("appkey", "list") =>
+          appkeyList(ca)
+        case Seq("appkey", "delete") =>
+          appkeyDelete(ca)
         case _ =>
           error(
             s"Unrecognized command sequence: ${ca.commands.mkString(" ")}\n")
@@ -690,6 +757,40 @@ object Console extends Logging {
       FileUtils.copyDirectory(paramsDir, new File(distDir, paramsDir.getName))
     Files.createFile(distDir.toPath.resolve(distFilename))
     info(s"Successfully created distributable at: ${distDir.getCanonicalPath}")
+  }
+
+  def appkeyNew(ca: ConsoleArgs): Unit = {
+    val appkeys = Storage.getMetaDataAppkeys
+    val appkey = appkeys.insert(Appkey(
+      appkey = "",
+      appid = ca.appkey.appid,
+      events = ca.appkey.events))
+    appkey map { k =>
+      info(s"Created new app key: ${k}")
+    } getOrElse {
+      error(s"Unable to create new app key.")
+    }
+  }
+
+  def appkeyList(ca: ConsoleArgs): Unit = {
+    val keys =
+      if (ca.appkey.appid == 0)
+        Storage.getMetaDataAppkeys.getAll
+      else
+        Storage.getMetaDataAppkeys.getByAppid(ca.appkey.appid)
+    val title = "Appkey"
+    info(f"$title%64s | App ID | Allowed Event(s)")
+    keys foreach { k =>
+      info(f"${k.appkey}%s | ${k.appid}%6d | ${k.events.mkString(",")}%s")
+    }
+    info(s"Finished listing ${keys.size} app key(s).")
+  }
+
+  def appkeyDelete(ca: ConsoleArgs): Unit = {
+    if (Storage.getMetaDataAppkeys.delete(ca.appkey.appkey))
+      info(s"Deleted app key ${ca.appkey.appkey}.")
+    else
+      error(s"Error deleting app key ${ca.appkey.appkey}.")
   }
 
   def coreAssembly(pioHome: String): File = {

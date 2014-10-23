@@ -20,8 +20,8 @@ case class MovieDataSourceParams(
   val attributeNames: base.AttributeNames,
   override val slidingEval: Option[base.EventsSlidingEvalParams] = None,
   val evalParams: Option[EvalParams] = None*/
-    val filePath: String
-    val userFilePath: String
+    val filePath: String,
+    val userFilePath: String,
     val movieFilePath: String
   ) extends base.AbstractEventsDataSourceParams
 
@@ -63,20 +63,20 @@ class MovieDataSource(dsp: MovieDataSourceParams)
       msc = new Scanner(movieFile)
     } catch (FileNotFoundException e) {
       println("Caught FileNotFoundException " + e.getMessage())
-      System.exit(1)      
+      System.exit(1)
     }
 
-    List[TrainingData#Rating] ratings = new ArrayList[TrainingData#Rating]()
+    List[Rating] ratings = new ArrayList[Rating]()
 
     while (sc.hasNext()) {
       var line = sc.nextLine()
-      var tokens: String[] = line.split("[\t,]")
+      var tokens = line.split("[\t,]")
 
       try {
-        TrainingData#Rating rating = new TrainingData#Rating(
-          Integer.parseInt(tokens[0]),
-          Integer.parseInt(tokens[1]),
-          Float.parseFloat(tokens[2]))
+        Rating rating = new Rating(
+          Integer.parseInt(tokens(0)),
+          Integer.parseInt(tokens(1)),
+          Float.parseFloat(tokens(2)))
         ratings.add(rating)
       } catch (Exception e) {
         println("Can't parse rating file. Caught Exception: " + e.getMessage())
@@ -84,19 +84,19 @@ class MovieDataSource(dsp: MovieDataSourceParams)
       }
     }
 
-    List[TrainingData#User] users = new ArrayList[TrainingData#Users]()
+    List[User] users = new ArrayList[Users]()
 
     while (usc.hasNext()) {
       var line = usc.nextLine()
-      var tokens: String[] = line.split("\\|")
+      var tokens = line.split("\\|")
 
       try {
-        TrainingData#User user = new TrainingData#User(
-          Integer.parseInt(tokens[0]),
-          Integer.parseInt(tokens[1]),
-          tokens[2],
-          tokens[3]),
-          Integer.parseInt(tokens[4]))
+        User user = new User(
+          Integer.parseInt(tokens(0)),
+          Integer.parseInt(tokens(1)),
+          tokens(2),
+          tokens(3),
+          Integer.parseInt(tokens(4)))
         users.add(user)
       } catch (Exception e) {
         println("Can't parse user file. Caught Exception: " + e.getMessage())
@@ -104,18 +104,18 @@ class MovieDataSource(dsp: MovieDataSourceParams)
       }
     }
 
-    List[TrainingData#Movie] movies = new ArrayList[TrainingData#Movie]()
+    List[Movie] movies = new ArrayList[Movie]()
 
     while (msc.hasNext()) {
       var line = msc.nextLine()
-      var tokens: String[] = line.split("\\|")
+      var tokens = line.split("\\|")
 
       try {
-        TrainingData#Movie movie = new TrainingData#Movie(
-          Integer.parseInt(tokens[0]),
-          token[1],
-          Integer.parseInt(tokens[2]), // TODO release date parsing
-          token[3]) // TODO: URL parsing
+        Movie movie = new Movie(
+          Integer.parseInt(tokens(0)),
+          token(1),
+          Integer.parseInt(tokens(2)), // TODO release date parsing
+          token(3)) // TODO: URL parsing
         // TODO: Add genre
         movies.add(movie)
       } catch (Exception e) {
@@ -145,7 +145,7 @@ class MovieDataSource(dsp: MovieDataSourceParams)
     evalUntil: DateTime): (DataParams, Seq[(Query, Actual)]) = {
 
     require(
-      !dsp.evalParams.isEmpty, 
+      !dsp.evalParams.isEmpty,
       "EventsDataSourceParams.evalParams must not be empty")
 
     val evalParams = dsp.evalParams.get
@@ -153,9 +153,9 @@ class MovieDataSource(dsp: MovieDataSourceParams)
     val ui2uid: Map[Int, String] = users.mapValues(_.uid)
     val ii2iid: Map[Int, String] = items.mapValues(_.iid)
 
-    val userActions: Map[Int, Seq[base.U2IActionTD]] = 
+    val userActions: Map[Int, Seq[base.U2IActionTD]] =
       actions.groupBy(_.uindex)
-    
+
     val allIids: Vector[String]  = actions.map(_.iindex)
       .map(ii => ii2iid(ii))
       .distinct
@@ -173,6 +173,6 @@ class MovieDataSource(dsp: MovieDataSourceParams)
     }}
     .toSeq
 
-    (new DataParams(trainUntil, evalStart, evalUntil), qaSeq) 
+    (new DataParams(trainUntil, evalStart, evalUntil), qaSeq)
   }*/
 }

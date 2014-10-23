@@ -1,5 +1,6 @@
-import io.prediction.controller.Params
+package io.prediction.engines.movierec
 
+import io.prediction.controller._
 import scala.io.Source
 
 case class DataSourceParams(
@@ -10,12 +11,12 @@ case class DataSource(
   val params: DataSourceParams
 ) extends LDataSource[DataSourceParams, EmptyDataParams,
                       TrainingData, Query, EmptyActual] {
-  
+
   override def readTraining: TrainingData = {
     val ratings = Source.fromFile(params.filePath).getLines()
-      .toList.map { line => 
+      .toList.map { line =>
         val data = line.split("[\t,]")
-        new Rating(data(0), data(1), data(2))
+        new Rating(data(0).toInt, data(1).toInt, data(2).toFloat)
       }
 
     val users = Source.fromFile(params.filePath).getLines()
@@ -33,4 +34,3 @@ case class DataSource(
     new TrainingData(ratings, users, movies)
   }
 }
-  

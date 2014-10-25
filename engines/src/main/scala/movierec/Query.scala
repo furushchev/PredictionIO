@@ -1,8 +1,11 @@
+package io.prediction.engines.movierec
+
 import java.io.Serializable
 
-object Query (
-  val uid: Int // user ID
-  var iid: Int // item ID
-) extends Serializable {
-	override def toString = "(" + uid + "," + iid + ")"
+case class Query (
+    val uid: Int, // user ID
+    val mid: Int // movie ID
+  ) extends Serializable {
+
+  override def toString() = "(" + uid + ", " + mid + ")"
 }

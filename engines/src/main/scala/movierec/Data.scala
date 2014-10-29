@@ -9,3 +9,11 @@ case class Query (
 
   override def toString() = "(" + uid + ", " + mid + ")"
 }
+
+case class Prediction(
+  // the ranked iid with score
+   // val items: Seq[(String, Double)]
+    val result: Float
+  ) extends Serializable {
+  override def toString = s"${result}"
+}

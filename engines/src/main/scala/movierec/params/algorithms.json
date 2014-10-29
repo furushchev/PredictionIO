@@ -1,0 +1,8 @@
+[
+    {
+        "name": "MovieRecAlgorithm",
+        "params": {
+            "threshold": 0.2
+        }
+    }
+]

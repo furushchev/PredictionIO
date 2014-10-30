@@ -32,7 +32,8 @@ case class AttributeNames(
   val starttime: String,
   val endtime: String,
   val inactive: String,
-  val rating: String
+  val rating: String,
+  val gender: String
 )
 
 /* Training Data */
@@ -46,7 +47,8 @@ class ItemTD(
   }
 
 class UserTD(
-  val uid: String
+  val uid: String,
+  val gender: String
 ) extends Serializable {
   override def toString = s"${uid}"
 }

@@ -17,7 +17,7 @@ object Runner {
 
     // Define params
     // ---------------------------------------------------------------
-    val dsp = EventsDataSourceParams(
+    val dsp = DataSourceParams(
       ratingsFilePath = "",
       usersFilePath = "",
       moviesFilePath = ""
@@ -28,7 +28,7 @@ object Runner {
     val pp = new EmptyParams()
 
     val mrp = new MovieRecAlgorithmParams(
-      threshold = Double.MinPositiveValue,
+      threshold = Double.MinPositiveValue
     )
 
     val sp = new EmptyParams()
@@ -50,7 +50,7 @@ object Runner {
         batch = "Imagine: Local MovieRec Engine",
         verbose = 0),
       engine = engine,
-      engineParams = engineParams,
+      engineParams = engineParams
       //metricsClassOpt = Some(classOf[MovieRecMetrics]),
       //metricsParams = mp
     )

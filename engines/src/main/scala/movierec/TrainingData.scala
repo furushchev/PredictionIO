@@ -1,12 +1,11 @@
 package io.prediction.engines.movierec
 
 import java.io.Serializable
-//import java.util.List
 
 class TrainingData (
     val ratings: Seq[Rating],
-    val users: Seq[User],
-    var movies: Seq[Movie]
+    val users:   Seq[User],
+    var movies:  Seq[Movie]
   ) extends Serializable {
 
   override def toString(): String = {
@@ -23,33 +22,30 @@ class Rating(
   val mid: Int,
   val rating: Float
 ) extends Serializable {
-
-override def toString() = "(" + uid + ", " + mid + ", " + rating + ")"
+  override def toString() = "(" + uid + ", " + mid + ", " + rating + ")"
 }
 
 class Movie(
   val mid: Int,
-  val title: Int,
-  val releaseDate: Date,
+  val title: String,
+  val releaseDate: Int,
   //val videoReleaseDate: Date
-  val imdbUrl: String
-  // TODO: decide how to implement genre flags
+  val imdbUrl: String,
+  val genre: Int
 ) extends Serializable {
-
-override def toString() = "Movie: " + title + " ID: " + mid
-                          + " ReleaseDate: " + releaseDate
-                          + " ImdbUrl: " + imdbUrl
+  override def toString() = "Movie: " + title + " ID: " + mid +
+                            " ReleaseDate: " + releaseDate +
+                            " ImdbUrl: " + imdbUrl
 }
 
 class User(
   val uid: Int,
   val age: Int,
-  val gender: Char,
+  val gender: String,
   val occupation: String,
   val zip: Int
 ) extends Serializable {
-
-override def toString() = "UserID: " + uid + " Age: " + age
-                                  + " Gender: " + gender + " Occupation: "
-                                  + occupation + " zip: " + zip
+  override def toString() = "UserID: " + uid + " Age: " + age +
+                            " Gender: " + gender + " Occupation: " +
+                            occupation + " zip: " + zip
 }

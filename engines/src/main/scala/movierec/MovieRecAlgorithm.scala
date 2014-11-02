@@ -4,6 +4,9 @@ import java.io.Serializable
 import java.util.Map
 import org.apache.commons.math3.linear.RealVector
 
+import io.prediction.controller.Params
+import io.prediction.controller.LAlgorithm
+
 class Model (
     val itemSimilarity: Map[Integer, RealVector],
     val userHistory: Map[Integer, RealVector]
@@ -11,30 +14,30 @@ class Model (
 
   override def toString(): String = {
     if ((itemSimilarity.size() > 20) || (userHistory.size() > 20)) {
-      "Model: [itemSimilarity.size=" + itemSimilarity.size() + "]\n"
-      +"[userHistory.size=" + userHistory.size() + "]"
+      "Model: [itemSimilarity.size=" + itemSimilarity.size() + "]\n" +
+      "[userHistory.size=" + userHistory.size() + "]"
     } else {
-      "Model: [itemSimilarity: " + itemSimilarity.toString() + "]\n"
-      +"[userHistory: " + userHistory.toString() + "]"
+      "Model: [itemSimilarity: " + itemSimilarity.toString() + "]\n" +
+      "[userHistory: " + userHistory.toString() + "]"
     }
   }
 }
 
-class AlgoParams (
+class MovieRecAlgorithmParams (
     val threshold: Double
   ) extends Params
 
 class MovieRecAlgorithm (
-  ) extends LAlgorithm[AlgoParams, TrainingData, Model, Query, Prediction] {
+  ) extends LAlgorithm[MovieRecAlgorithmParams, TrainingData, Model, Query, Prediction] {
 
   def train(td: TrainingData): Model = {
 
-    return new Model(new Map(), new Map())
+    return null
   }
 
   // from tutorial
   def predict(model: Model, query: Query): Prediction = {
-    var itemVector = model.itemSimilarity.get(query.mid);
+/*    var itemVector = model.itemSimilarity.get(query.mid);
     var userVector = model.userHistory.get(query.uid);
 
     if (itemVector == null) {
@@ -46,7 +49,8 @@ class MovieRecAlgorithm (
     else {
       var accum = 0.0
       var accumSim = 0.0
-      for (var i <- 0 to itemVector.getDimension()) {
+      var i = 0
+      for (i <- 0 to itemVector.getDimension()) {
         var weight = itemVector.getEntry(i);
         var rating = userVector.getEntry(i);
         if ((weight != 0) && (rating != 0)) {
@@ -60,7 +64,8 @@ class MovieRecAlgorithm (
         return new Prediction(Float.NaN);
       } else {
         return new Prediction((Float) (accum / accumSim));
-      }
+      }*/
+    return new Prediction(Float.NaN)
   }
 
 }

@@ -3,13 +3,14 @@ package io.prediction.engines.movierec
 import io.prediction.controller.IEngineFactory
 import io.prediction.controller.Engine
 
-object EngineFactory extends IEngineFactory {
+object MovieRecEngine extends IEngineFactory {
   def apply() = {
     new Engine(
-      classOf[MovieDataSource],
+      classOf[DataSource],
       classOf[MovieRecPreparator],
       Map(
-        "ncMahoutItemBased" -> classOf[NCItemBasedAlgorithm]),
+        "MovieRecAlgorithm" -> classOf[MovieRecAlgorithm]
+        ),
       classOf[MovieRecServing]
     )
   }

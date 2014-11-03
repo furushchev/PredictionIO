@@ -6,10 +6,12 @@ import io.prediction.controller.Engine
 object MovieRecEngine extends IEngineFactory {
   def apply() = {
     new Engine(
-      classOf[DataSource],
+      //classOf[EventsDataSource],
+      classOf[FileDataSource],
       classOf[MovieRecPreparator],
       Map(
-        "MovieRecAlgorithm" -> classOf[MovieRecAlgorithm]
+        "rand" -> classOf[RandomAlgorithm],
+        "movieRecAlgorithm" -> classOf[MovieRecAlgorithm]
         ),
       classOf[MovieRecServing]
     )

@@ -3,23 +3,27 @@ package io.prediction.engines.movierec
 import io.prediction.controller._
 import scala.io.Source
 
-class DataSourceParams(
-  val ratingsFilePath: String,
-  val usersFilePath:   String,
-  val moviesFilePath:  String
-) extends Params
+class FileDataSourceParams(
+    val ratingsFilePath: String,
+    val usersFilePath:   String,
+    val moviesFilePath:  String
+  ) extends Params
 
-class DataSource(
-  val params: DataSourceParams
-) extends LDataSource[DataSourceParams, EmptyDataParams,
-                      TrainingData, Query, EmptyActual] {
+class FileDataSource(params: FileDataSourceParams)
+  extends LDataSource[
+    FileDataSourceParams,
+    EmptyParams,
+    TrainingData,
+    Query,
+    Actual] {
 
-  override def readTraining: TrainingData = {
+  override
+  def readTraining: TrainingData = {
     val delim = "[\t,]"
     val ratings = Source.fromFile(params.ratingsFilePath).getLines()
       .toList.map { line =>
         val data = line.split(delim)
-        new Rating(data(0).toInt, data(1).toInt, data(2).toFloat)
+        new Rating(data(0).toInt, data(1).toInt, data(2).toInt)
       }
 
     val users = Source.fromFile(params.usersFilePath).getLines()

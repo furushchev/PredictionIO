@@ -1,5 +1,5 @@
 {
-  "id": "io.prediction.engines.movierec",
+  "id": "io.prediction.engines.movierec.MovieRecEngine",
   "version": "0.8.1-SNAPSHOT",
   "name": "PredictionIO MovieRec Engine",
   "engineFactory": "io.prediction.engines.movierec.MovieRecEngine"

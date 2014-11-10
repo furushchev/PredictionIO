@@ -27,7 +27,8 @@ $ $PIO_HOME/bin/pio deploy \
 
 ## Register engine through distribution. Useful for params testing.
 ```
-$ ./make_distribtuion.sh
+$ cd $PIO_HOME
+$ ./make_distribution.sh
 $ cd $PIO_HOME/engines/src/main/scala/movierec/examples/
 $ $PIO_HOME/bin/pio register
 $ $PIO_HOME/bin/pio train -ap **ONE_OF_THE_ALGO**.json

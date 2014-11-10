@@ -23,7 +23,7 @@ class FileDataSource(params: FileDataSourceParams)
   def readTraining: TrainingData = {
     val delim = "[\t,]"
 
-/*    val ratings = Source.fromFile(params.ratingsFilePath).getLines()
+    val ratings = Source.fromFile(params.ratingsFilePath).getLines()
       .toList.map { line =>
         val data = line.split(delim)
         new Rating(data(0).toInt, data(1).toInt, data(2).toInt)
@@ -41,7 +41,7 @@ class FileDataSource(params: FileDataSourceParams)
         new Movie(data(0).toInt, data(1), data(2).toInt, data(3), data(4).toInt)
       }
 
-    new TrainingData(ratings, users, movies)*/
+    new TrainingData(ratings, users, movies)
     return null
   }
 }

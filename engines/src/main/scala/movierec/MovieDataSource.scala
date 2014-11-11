@@ -1,4 +1,4 @@
-/*package io.prediction.engines.movierec
+/* io.prediction.engines.movierec
 
 import io.prediction.controller.EmptyDataParams
 import io.prediction.engines.base
@@ -8,19 +8,22 @@ import io.prediction.controller.Params
 import io.prediction.engines.base.DataParams
 
 import java.util.List
+import java.util.Scanner
+import scala.io._
+
 
 case class MovieDataSourceParams(
-  /*val appId: Int,
-  // default None to include all itypes
-  val itypes: Option[Set[String]] = None, // train items with these itypes
-  // actions for training
-  val actions: Set[String],
-  val startTime: Option[DateTime] = None, // event starttime
-  val untilTime: Option[DateTime] = None, // event untiltime
-  val attributeNames: base.AttributeNames,
-  override val slidingEval: Option[base.EventsSlidingEvalParams] = None,
-  val evalParams: Option[EvalParams] = None*/
-    val filePath: String,
+    /*val appId: Int,
+    // default None to include all itypes
+    val itypes: Option[Set[String]] = None, // train items with these itypes
+    // actions for training
+    val actions: Set[String],
+    val startTime: Option[DateTime] = None, // event starttime
+    val untilTime: Option[DateTime] = None, // event untiltime
+    val attributeNames: base.AttributeNames,
+    override val slidingEval: Option[base.EventsSlidingEvalParams] = None,
+    val evalParams: Option[EvalParams] = None*/
+    val ratingsFilePath: String,
     val userFilePath: String,
     val movieFilePath: String
   ) extends base.AbstractEventsDataSourceParams
@@ -36,44 +39,31 @@ class MovieDataSource(dsp: MovieDataSourceParams)
   extends base.EventsDataSource[DataParams, Query, Actual](dsp) {
 
   override def read() {
-    File ratingFile = new File(dsp.filePath)
-    Scanner sc = null
+    val delim = "[\t,]"
+    val ratings = Source.fromFile(dsp.ratingsFilePath).getLines()
+        .toList.map { it =>
+            val line = it.split(delim)
+            new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
+        }
 
-    File userFile = new File(dsp.userFilePath)
-    Scanner usc = null
+    val users = Source.fromFile(dsp.userFilePath).getLines()
+        .toList.map { it =>
+            val line = it.split(delim)
+            new Rating(line(0).toInt, line(1).toInt, line(2).toDouble)
+        }
+    val movies = Source.fromFile(dsp.movieFilePath).getLines()
+ 
 
-    File movieFile = new File(dsp.movieFilePath)
-    Scanner msc = null
+   /* var ratings = Seq[Rating]()
 
-    try {
-      sc = new Scanner(ratingFile)
-    } catch (FileNotFoundException e){
-      println("Caught FileNotFoundException " + e.getMessage())
-      System.exit(1)
-    }
 
-    try {
-      usc = new Scanner(userFile)
-    } catch (FileNotFoundException e) {
-      println("Caught FileNotFoundException " + e.getMessage())
-      System.exit(1)
-    }
 
-    try {
-      msc = new Scanner(movieFile)
-    } catch (FileNotFoundException e) {
-      println("Caught FileNotFoundException " + e.getMessage())
-      System.exit(1)
-    }
-
-    List[Rating] ratings = new ArrayList[Rating]()
-
-    while (sc.hasNext()) {
-      var line = sc.nextLine()
+    while (ratingIt.hasNext) {
+      var line = ratingIt.next()
       var tokens = line.split("[\t,]")
 
       try {
-        Rating rating = new Rating(
+        val rating = new Rating(
           Integer.parseInt(tokens(0)),
           Integer.parseInt(tokens(1)),
           Float.parseFloat(tokens(2)))
@@ -82,16 +72,16 @@ class MovieDataSource(dsp: MovieDataSourceParams)
         println("Can't parse rating file. Caught Exception: " + e.getMessage())
         System.exit(1)
       }
-    }
+    }*/
 
-    List[User] users = new ArrayList[Users]()
+    var users = Seq[Users]()
 
-    while (usc.hasNext()) {
-      var line = usc.nextLine()
+    while (userIt.hasNext) {
+      var line = userIt.next()
       var tokens = line.split("\\|")
 
       try {
-        User user = new User(
+        val user = new User(
           Integer.parseInt(tokens(0)),
           Integer.parseInt(tokens(1)),
           tokens(2),
@@ -104,19 +94,19 @@ class MovieDataSource(dsp: MovieDataSourceParams)
       }
     }
 
-    List[Movie] movies = new ArrayList[Movie]()
+    val movies = Seq[Movie]()
 
-    while (msc.hasNext()) {
-      var line = msc.nextLine()
+    while (movieIt.hasNext) {
+      var line = movieIt.next()
       var tokens = line.split("\\|")
 
       try {
-        Movie movie = new Movie(
-          Integer.parseInt(tokens(0)),
-          token(1),
+        val movie = new Movie(
+          Integer.parseInt(tokens(0)),//mid
+          token(1),//title
           Integer.parseInt(tokens(2)), // TODO release date parsing
-          token(3)) // TODO: URL parsing
-        // TODO: Add genre
+          token(3), // TODO: URL parsing
+          Integer.parseInt(tokens(4)))// TODO parse Genre
         movies.add(movie)
       } catch (Exception e) {
         println("Can't parse movie file. Caught Exception: " + e.getMessage())
@@ -136,7 +126,7 @@ class MovieDataSource(dsp: MovieDataSourceParams)
     return data;
   }
 
- /* override def generateQueryActualSeq(
+  /*override def generateQueryActualSeq(
     users: Map[Int, base.UserTD],
     items: Map[Int, base.ItemTD],
     actions: Seq[base.U2IActionTD],

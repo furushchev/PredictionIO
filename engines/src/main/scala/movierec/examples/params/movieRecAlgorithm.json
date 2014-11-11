@@ -1,6 +1,6 @@
 [
     {
-        "name": "MovieRecAlgorithm",
+        "name": "movieRecAlgorithm",
         "params": {
             "threshold": 0.2
         }

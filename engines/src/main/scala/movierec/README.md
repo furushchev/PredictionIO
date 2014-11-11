@@ -44,5 +44,5 @@ curl -i -X GET http://localhost:9997
 Get predictions
 e.g.
 ```
-curl -i -X POST http://localhost:9997/queries.json -d '{"uid": "12", "mid": 4}'
+curl -i -X POST http://localhost:9997/queries.json -d '{"uid": 12, "mid": 4}'
 ```

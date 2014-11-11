@@ -1,4 +1,4 @@
-/* io.prediction.engines.movierec
+package io.prediction.engines.movierec
 
 import io.prediction.controller.EmptyDataParams
 import io.prediction.engines.base
@@ -13,7 +13,7 @@ import scala.io._
 
 
 case class MovieDataSourceParams(
-    /*val appId: Int,
+    val appId: Int,
     // default None to include all itypes
     val itypes: Option[Set[String]] = None, // train items with these itypes
     // actions for training
@@ -22,7 +22,7 @@ case class MovieDataSourceParams(
     val untilTime: Option[DateTime] = None, // event untiltime
     val attributeNames: base.AttributeNames,
     override val slidingEval: Option[base.EventsSlidingEvalParams] = None,
-    val evalParams: Option[EvalParams] = None*/
+    val evalParams: Option[EvalParams] = None,
     val ratingsFilePath: String,
     val userFilePath: String,
     val movieFilePath: String
@@ -38,7 +38,7 @@ case class EvalParams(
 class MovieDataSource(dsp: MovieDataSourceParams)
   extends base.EventsDataSource[DataParams, Query, Actual](dsp) {
 
-  override def read() {
+  def readTrainingData(): TrainingData = {
     val delim = "[\t,]"
     val ratings = Source.fromFile(dsp.ratingsFilePath).getLines()
         .toList.map { it =>
@@ -49,80 +49,16 @@ class MovieDataSource(dsp: MovieDataSourceParams)
     val users = Source.fromFile(dsp.userFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            new Rating(line(0).toInt, line(1).toInt, line(2).toDouble)
+            new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4).toInt)
         }
     val movies = Source.fromFile(dsp.movieFilePath).getLines()
+        .toList.map { it =>
+            val line = it.split(delim)// TODO Genre parsing
+            new Movie(line(0).toInt, line(1), line(2).toInt, line(3), line(4).toInt)
+        }
  
 
-   /* var ratings = Seq[Rating]()
-
-
-
-    while (ratingIt.hasNext) {
-      var line = ratingIt.next()
-      var tokens = line.split("[\t,]")
-
-      try {
-        val rating = new Rating(
-          Integer.parseInt(tokens(0)),
-          Integer.parseInt(tokens(1)),
-          Float.parseFloat(tokens(2)))
-        ratings.add(rating)
-      } catch (Exception e) {
-        println("Can't parse rating file. Caught Exception: " + e.getMessage())
-        System.exit(1)
-      }
-    }*/
-
-    var users = Seq[Users]()
-
-    while (userIt.hasNext) {
-      var line = userIt.next()
-      var tokens = line.split("\\|")
-
-      try {
-        val user = new User(
-          Integer.parseInt(tokens(0)),
-          Integer.parseInt(tokens(1)),
-          tokens(2),
-          tokens(3),
-          Integer.parseInt(tokens(4)))
-        users.add(user)
-      } catch (Exception e) {
-        println("Can't parse user file. Caught Exception: " + e.getMessage())
-        System.exit(1)
-      }
-    }
-
-    val movies = Seq[Movie]()
-
-    while (movieIt.hasNext) {
-      var line = movieIt.next()
-      var tokens = line.split("\\|")
-
-      try {
-        val movie = new Movie(
-          Integer.parseInt(tokens(0)),//mid
-          token(1),//title
-          Integer.parseInt(tokens(2)), // TODO release date parsing
-          token(3), // TODO: URL parsing
-          Integer.parseInt(tokens(4)))// TODO parse Genre
-        movies.add(movie)
-      } catch (Exception e) {
-        println("Can't parse movie file. Caught Exception: " + e.getMessage())
-        System.exit(1)
-      }
-    }
-      /*List<Tuple3<Object, TrainingData, Iterable<Tuple2<Query, Object>>>> data =
-        new ArrayList<Tuple3<Object, TrainingData, Iterable<Tuple2<Query, Object>>>>();
-
-      data.add(new Tuple3<Object, TrainingData, Iterable<Tuple2<Query, Object>>>(
-        null,
-        new TrainingData(ratings),
-        new ArrayList<Tuple2<Query, Object>>()
-      ));*/
-
-    val data = TrainingData(ratings, users, movies);
+    val data = new TrainingData(ratings, users, movies);
     return data;
   }
 
@@ -166,4 +102,3 @@ class MovieDataSource(dsp: MovieDataSourceParams)
     (new DataParams(trainUntil, evalStart, evalUntil), qaSeq)
   }*/
 }
-*/

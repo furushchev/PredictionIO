@@ -35,10 +35,15 @@ class PreparedData (
 class Rating(
     val uid:    Int,
     val mid:    Int,
-    val rating: Int
+    val rating: Float
   ) extends Serializable {
   override def toString() = "(" + uid + ", " + mid + ", " + rating + ")"
 }
+
+ //unknown | Action | Adventure | Animation |
+//              Children's | Comedy | Crime | Documentary | Drama | Fantasy |
+ //             Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
+   //           Thriller | War | Western 
 
 class Movie(
     val mid: Int,

@@ -12,8 +12,7 @@ class MovieRecPreparator(pp: PreparatorParams)
 
   override def prepare(trainingData: TrainingData): PreparedData = {
 
-/*    new PreparedData(
-    )*/
-    return null
+    new PreparedData(trainingData.ratings, trainingData.users, trainingData.movies)
+    
   }
 }

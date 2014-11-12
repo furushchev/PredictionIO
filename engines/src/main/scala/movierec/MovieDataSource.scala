@@ -1,19 +1,18 @@
 package io.prediction.engines.movierec
 
-import io.prediction.controller.EmptyDataParams
-import io.prediction.engines.base
-import io.prediction.engines.base.HasName
-import org.joda.time.DateTime
+//import io.prediction.controller.EmptyDataParams
+//import io.prediction.engines.base
+//import io.prediction.engines.base.HasName
+//import org.joda.time.DateTime
+import io.prediction.controller.EmptyParams
 import io.prediction.controller.Params
-import io.prediction.engines.base.DataParams
-
-import java.util.List
-import java.util.Scanner
-import scala.io._
+import io.prediction.controller.LDataSource
+import scala.io.Source
 
 
-case class MovieDataSourceParams(
-    val appId: Int,
+
+class MovieDataSourceParams(
+    /*val appId: Int,
     // default None to include all itypes
     val itypes: Option[Set[String]] = None, // train items with these itypes
     // actions for training
@@ -22,11 +21,12 @@ case class MovieDataSourceParams(
     val untilTime: Option[DateTime] = None, // event untiltime
     val attributeNames: base.AttributeNames,
     override val slidingEval: Option[base.EventsSlidingEvalParams] = None,
-    val evalParams: Option[EvalParams] = None,
+    val evalParams: Option[EvalParams] = None,*/
     val ratingsFilePath: String,
-    val userFilePath: String,
-    val movieFilePath: String
-  ) extends base.AbstractEventsDataSourceParams
+    val usersFilePath: String,
+    val moviesFilePath: String
+  //) extends base.AbstractEventsDataSourceParams
+  ) extends Params
 
 case class EvalParams(
     // The variable n in Query, i.e. the number of items requested from the
@@ -35,31 +35,55 @@ case class EvalParams(
     val queryN: Int = -1
   )
 
-class MovieDataSource(dsp: MovieDataSourceParams)
-  extends base.EventsDataSource[DataParams, Query, Actual](dsp) {
+class MovieDataSource(params: MovieDataSourceParams)
+  //extends base.EventsDataSource[DataParams, Query, Actual](params) {
+  extends LDataSource[
+    MovieDataSourceParams,
+    EmptyParams,
+    TrainingData,
+    Query,
+    Actual] {
 
-  def readTrainingData(): TrainingData = {
-    val delim = "[\t,]"
-    val ratings = Source.fromFile(dsp.ratingsFilePath).getLines()
+  // TODO Maybe We need to trim()?
+  override def read(): Seq[(EmptyParams, TrainingData, Seq[(Query, Actual)])] = {
+    val delim = "[\t|]"
+    println("START READING FILES")
+
+    //def getCurrentDirectory = new java.io.File( "." ).getCanonicalPath //Used to print curr directory
+    //println(getCurrentDirectory)///home/beth/MovieLens/PredictionIO/engines
+
+    val ratings = Source.fromFile(params.ratingsFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
+            println(new Rating(line(0).toInt, line(1).toInt, line(2).toFloat).toString())
             new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
         }
-
-    val users = Source.fromFile(dsp.userFilePath).getLines()
+    println("DONE RATING FILE")
+    
+    val users = Source.fromFile(params.usersFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4).toInt)
+            println(new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4)).toString())
+            new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4))
         }
-    val movies = Source.fromFile(dsp.movieFilePath).getLines()
+    println("DONE USERS FILE")
+
+    // movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) | 
+    //unknown | Action | Adventure | Animation | Children's | Comedy | Crime | Documentary |
+    //Drama | Fantasy |Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
+    //Thriller | War | Western |
+
+    val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()//To avoid java.nio.charset.MalformedInputException
         .toList.map { it =>
-            val line = it.split(delim)// TODO Genre parsing
-            new Movie(line(0).toInt, line(1), line(2).toInt, line(3), line(4).toInt)
+            val line = it.split(delim)// TODO Genre parsing and Data parsing
+            println(new Movie(line(0).toInt, line(1), line(2), 0).toString())
+            new Movie(line(0).toInt, line(1), line(2), 0)
         }
- 
+    println("DONE MOVIES FILE. FINISHED ALL")
+
 
     val data = new TrainingData(ratings, users, movies);
-    return data;
+    return Seq((null.asInstanceOf[EmptyParams], data, Seq[(Query, Actual)]()))
   }
 
   /*override def generateQueryActualSeq(
@@ -71,10 +95,10 @@ class MovieDataSource(dsp: MovieDataSourceParams)
     evalUntil: DateTime): (DataParams, Seq[(Query, Actual)]) = {
 
     require(
-      !dsp.evalParams.isEmpty,
+      !params.evalParams.isEmpty,
       "EventsDataSourceParams.evalParams must not be empty")
 
-    val evalParams = dsp.evalParams.get
+    val evalParams = params.evalParams.get
 
     val ui2uid: Map[Int, String] = users.mapValues(_.uid)
     val ii2iid: Map[Int, String] = items.mapValues(_.iid)

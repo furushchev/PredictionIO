@@ -37,35 +37,37 @@ class Rating(
     val mid:    Int,
     val rating: Float
   ) extends Serializable {
-  override def toString() = "(" + uid + ", " + mid + ", " + rating + ")"
+  override def toString() = "User: " + uid + " rates Movie: " + mid + " (" + rating + " / 5)"
 }
 
- //unknown | Action | Adventure | Animation |
-//              Children's | Comedy | Crime | Documentary | Drama | Fantasy |
- //             Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
-   //           Thriller | War | Western 
-
-class Movie(
-    val mid: Int,
-    val title: String,
-    val releaseDate: Int,
-    //val videoReleaseDate: Date
-    val imdbUrl: String,
-    val genre: Int
-  ) extends Serializable {
-  override def toString() = "Movie: " + title + " ID: " + mid +
-                            " ReleaseDate: " + releaseDate +
-                            " ImdbUrl: " + imdbUrl
-}
 
 class User(
     val uid: Int,
     val age: Int,
     val gender: String,
     val occupation: String,
-    val zip: Int
+    val zip: String //Some zipcode is T8H1N
   ) extends Serializable {
-  override def toString() = "UserID: " + uid + " Age: " + age +
-                            " Gender: " + gender + " Occupation: " +
-                            occupation + " zip: " + zip
+  override def toString() = "UserID: " + uid + ", Age: " + age +
+                            ", Gender: " + gender + ", Occupation: " +
+                            occupation + ", Zip: " + zip
 }
+
+// movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) | 
+//unknown | Action | Adventure | Animation | Children's | Comedy | Crime | Documentary |
+//Drama | Fantasy |Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
+//Thriller | War | Western | 
+
+class Movie(
+    val mid: Int,
+    val title: String,
+    val releaseDate: String, //TODO Date type
+    val genre: Int
+  ) extends Serializable {
+  override def toString() = "Movie: " + title + ", ID: " + mid +
+                            ", ReleaseDate: " + releaseDate + 
+                            ", Genre: " + genre.toBinaryString
+}
+
+
+class Genre

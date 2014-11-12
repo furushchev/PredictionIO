@@ -7,7 +7,7 @@ object MovieRecEngine extends IEngineFactory {
   def apply() = {
     new Engine(
       //classOf[EventsDataSource],
-      classOf[FileDataSource],
+      classOf[MovieDataSource],
       classOf[MovieRecPreparator],
       Map(
         "rand" -> classOf[RandomAlgorithm],

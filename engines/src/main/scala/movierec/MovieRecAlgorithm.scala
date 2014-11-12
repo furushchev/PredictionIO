@@ -32,7 +32,7 @@ class MovieRecAlgorithm (params: MovieRecAlgorithmParams)
 
   override
   def train(pd: PreparedData): MovieRecModel = {
-    return null
+    return null//using PreparedData to construct model
   }
 
   override

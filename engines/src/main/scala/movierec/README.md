@@ -59,6 +59,10 @@ User: 224 rates Movie: 69 (4.0 / 5)
 User: 272 rates Movie: 317 (4.0 / 5)
 User: 221 rates Movie: 1010 (3.0 / 5)
 ```
+Currently, TrainingData is contructed by Rating, User and Movie.
+PreparedData is the same as TrainingData (not null any more)
+
+TODO parsing Date, deal with String Runtimes and zipcode, use array/list to store actors, directors and writers(?), deal with multiple countries and languages in one movie...
 
 
 ## After deploy, you can get predictions

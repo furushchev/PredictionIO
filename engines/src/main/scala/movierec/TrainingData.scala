@@ -129,8 +129,13 @@ object Genre {//extends Enumeration{}
   val Thriller = 16
   val War = 17
   val Western = 18
-  
+
   val values = Array(Unknown, Action, Adventure, Animation, Childrens, Comedy, Crime,
                 Documentary, Drama, Fantasy, FilmNoir, Horror, Musical, Mystery,
                 Romance, SciFi, Thriller, War, Western)
+
+  /** How to check genre:
+   e.g.check Animation
+   if(theGenreFromMovie & (1 << Genre.Animation))
+  */
 }

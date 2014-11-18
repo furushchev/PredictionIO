@@ -41,7 +41,7 @@ class Rating(
 }
 
 
-class User(
+class User(//UserTD
     val uid: Int,
     val age: Int,
     val gender: String,
@@ -60,11 +60,12 @@ class User(
 
  //directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot 
 
-class Movie(
+class Movie(//ItemTD
     val mid: Int,
     val title: String,
     val releaseDate: String, //TODO Date type
     val genre: Int,
+    val itypes: Seq[String],
     val directors: String,// TODO separate directors, writers and actors into list/array...
     val writers: String,
     val actors: String,
@@ -77,6 +78,7 @@ class Movie(
   override def toString() = ">>Movie: " + title + ", ID: " + mid +
                             ", ReleaseDate: " + releaseDate + 
                             ", Genre: " + genre.toBinaryString + 
+                            ", Itypes: " + itypes +
                             "\n\n Directors: " + directors +
                             ", Writers: " + writers +
                             ", Actors: " + actors +
@@ -133,6 +135,9 @@ object Genre {//extends Enumeration{}
   val values = Array(Unknown, Action, Adventure, Animation, Childrens, Comedy, Crime,
                 Documentary, Drama, Fantasy, FilmNoir, Horror, Musical, Mystery,
                 Romance, SciFi, Thriller, War, Western)
+  var itypes = Array("Unknown", "Action", "Adventure", "Animation", "Childrens", "Comedy", "Crime",
+                "Documentary", "Drama", "Fantasy", "FilmNoir", "Horror", "Musical", "Mystery",
+                "Romance", "SciFi", "Thriller", "War", "Western")
 
   /** How to check genre:
    e.g.check Animation

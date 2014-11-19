@@ -91,8 +91,7 @@ class Movie(//ItemTD
                             "\n\n Plot: " + plot + "\n"
 }
 
-object Genre {//extends Enumeration{}
-  //type Genre = Value
+object Genre {
 
   val itypes = Array("Unknown", "Action", "Adventure", "Animation",
                 "Childrens", "Comedy", "Crime", "Documentary", "Drama",
@@ -132,8 +131,4 @@ class Genre(binaryGenreList: Array[String]) {
   def getGenreList(): List[String] = {
     genreList
   }
-  /** How to check genre:
-   e.g.check Animation
-   if(theGenreFromMovie & (1 << Genre.Animation))
-  */
 }

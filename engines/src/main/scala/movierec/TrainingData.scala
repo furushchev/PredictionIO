@@ -1,5 +1,7 @@
 package io.prediction.engines.movierec
 
+import scala.collection.mutable.ListBuffer
+
 class TrainingData (
     val ratings: Seq[Rating],
     val users:   Seq[User],
@@ -53,12 +55,12 @@ class User(//UserTD
                             occupation + ", Zip: " + zip
 }
 
-// movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) | 
+// movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) |
 //unknown | Action | Adventure | Animation | Children's | Comedy | Crime | Documentary |
 //Drama | Fantasy |Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
 //Thriller | War | Western |
 
- //directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot 
+ //directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot
 
 class Movie(//ItemTD
     val mid: Int,
@@ -76,8 +78,8 @@ class Movie(//ItemTD
     val plot: String
   ) extends Serializable {
   override def toString() = ">>Movie: " + title + ", ID: " + mid +
-                            ", ReleaseDate: " + releaseDate + 
-                            ", Genre: " + genre.toBinaryString + 
+                            ", ReleaseDate: " + releaseDate +
+                            ", Genre: " + genre.toBinaryString +
                             ", Itypes: " + itypes +
                             "\n\n Directors: " + directors +
                             ", Writers: " + writers +
@@ -91,54 +93,45 @@ class Movie(//ItemTD
 
 object Genre {//extends Enumeration{}
   //type Genre = Value
-  /*val unknown = Value(0)
-  val Action = Value(1)
-  val Adventure = Value(2)
-  val Animation = Value(3)
-  val Childrens = Value(4)
-  val Comedy = Value(5)
-  val Crime = Value(6)
-  val Documentary = Value(7)
-  val Drama = Value(8)
-  val Fantasy = Value(9)
-  val FilmNoir = Value(10)
-  val Horror = Value(11)
-  val Musical = Value(12)
-  val Mystery = Value(13)
-  val Romance = Value(14)
-  val SciFi = Value(15)
-  val Thriller = Value(16)
-  val War = Value(17)
-  val Western = Value(18)*/
 
-  //type Genre = Value
-  val Unknown = 0
-  val Action = 1
-  val Adventure = 2
-  val Animation = 3
-  val Childrens = 4
-  val Comedy = 5
-  val Crime = 6
-  val Documentary = 7
-  val Drama = 8
-  val Fantasy = 9
-  val FilmNoir = 10
-  val Horror = 11
-  val Musical = 12
-  val Mystery = 13
-  val Romance = 14
-  val SciFi = 15
-  val Thriller = 16
-  val War = 17
-  val Western = 18
-
-  val values = Array(Unknown, Action, Adventure, Animation, Childrens, Comedy, Crime,
-                Documentary, Drama, Fantasy, FilmNoir, Horror, Musical, Mystery,
-                Romance, SciFi, Thriller, War, Western)
-  var itypes = Array("Unknown", "Action", "Adventure", "Animation", "Childrens", "Comedy", "Crime",
-                "Documentary", "Drama", "Fantasy", "FilmNoir", "Horror", "Musical", "Mystery",
+  val itypes = Array("Unknown", "Action", "Adventure", "Animation",
+                "Childrens", "Comedy", "Crime", "Documentary", "Drama",
+                "Fantasy", "FilmNoir", "Horror", "Musical", "Mystery",
                 "Romance", "SciFi", "Thriller", "War", "Western")
 
+  val numGenres = itypes.size
+
+  // if needed
+  // val gmap = itypes.zipWithIndex.toMap
+}
+
+class Genre(binaryGenreList: Array[String]) {
+
+  val (genreList: List[String], genreInt: Int) = {
+    var gi = 0
+    var gl = new ListBuffer[String]()
+    var i = 0
+    for(i <- 0 to Genre.itypes.size-1) {
+      val bit = binaryGenreList(i).toInt & 1
+      if (bit == 1) {
+        gl += Genre.itypes(i)
+      }
+      gi |= bit << i
+    }
+    (gl.toList, gi)
+  }
+
+  def toBinaryString(): String = {
+    genreInt.toBinaryString
+  }
+
+  def getGenreInt(): Int = {
+    genreInt
+  }
+
+  def getGenreList(): List[String] = {
+    genreList
+  }
   /** How to check genre:
    e.g.check Animation
    if(theGenreFromMovie & (1 << Genre.Animation))

@@ -9,6 +9,7 @@ import io.prediction.controller.Params
 import io.prediction.controller.LDataSource
 import scala.io.Source
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.HashMap
 
 
 
@@ -56,16 +57,17 @@ class MovieDataSource(params: MovieDataSourceParams)
     val ratings = Source.fromFile(params.ratingsFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            println(new Rating(line(0).toInt, line(1).toInt, line(2).toFloat).toString())
+        //    println(new Rating(line(0).toInt, line(1).toInt, line(2).toFloat).toString())
             new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
         }
     println("DONE RATING FILE")
 
-    val users = Source.fromFile(params.usersFilePath).getLines()
+    val users = HashMap[Int, User]()
+    Source.fromFile(params.usersFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            println(new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4)).toString())
-            new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4))
+         //   println(new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4)).toString())
+            users.put(line(0).toInt, new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4)))
         }
     println("DONE USERS FILE")
 
@@ -74,7 +76,8 @@ class MovieDataSource(params: MovieDataSourceParams)
     //Drama | Fantasy |Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
     //Thriller | War | Western |
 
-    val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()//To avoid java.nio.charset.MalformedInputException
+    val movies = HashMap[Int, Movie]()
+    Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()//To avoid java.nio.charset.MalformedInputException
         .toList.map { it =>
             val line = it.split(delim)// TODO Genre parsing and Data parsing
             var i = 5 + Genre.numGenres
@@ -86,21 +89,24 @@ class MovieDataSource(params: MovieDataSourceParams)
             //println("end of genre")
             //5+i directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot
             try{
-              println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
-                        line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7)).toString())
-              new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
-                        line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7))
+              //println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
+              //          line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7)).toString())
+              movies.put(line(0).toInt, new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), 
+                                                  line(i+1), line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7)))
             }catch{
               case e: Exception => println("DATA PARSING ERROR or Exception Caught: " + e)
 
-              new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
-                      line(i), line(i), line(i), line(i), line(i), line(i))
+              movies.put(line(0).toInt, new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
+                                                  line(i), line(i), line(i), line(i), line(i), line(i)))
             }
         }
     println("DONE MOVIES FILE. FINISHED ALL")
 
 
     val data = new TrainingData(ratings, users, movies);
+
+    //println(data.toString)
+    
     return Seq((null.asInstanceOf[EmptyParams], data, Seq[(Query, Actual)]()))
   }
 

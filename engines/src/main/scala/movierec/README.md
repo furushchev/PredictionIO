@@ -37,32 +37,62 @@ $ $PIO_HOME/bin/pio train -ap **ONE_OF_THE_ALGO**.json
 ## Output statement of pio train
 Movie Example:
 ```
->>Movie: Maverick (1994), ID: 73, ReleaseDate: 01-Jan-1994, Genre: 1000000000000100010
+, 1593 -> 
+Movie: Death in Brunswick (1991), ID: 1593, ReleaseDate: 16-Aug-1996, Genre: 100000, Itypes: List(Comedy)
 
- Directors: Richard Donner, Writers: Roy Huggins,William Goldman, Actors: Mel Gibson,Jodie Foster,James Garner,Graham Greene,Alfred Molina,James Coburn,Dub Taylor,Geoffrey Lewis,Paul L. Smith,Dan Hedaya,Dennis Fimple,Denver Pyle,Clint Black,Max Perlich,Art LaFleur,Leo Gordon,Paul Tuerpe,Jean De Baer,Paul Brinegar,Hal Ketchum,Corey Feldman,John M. Woodward,Jesse Eric Carroll,Toshonnie Touchin,John Meier,Steven Chambers,Doc Duhame,Frank Orsatti,Lauren Shuler Donner,Courtney Barilla,Kimberly Cullum,Gary Richard Frank,Read Morgan,Steve Kahan,Stephen Liska,Robert Jones,J. Mills Goodloe,Vilmos Zsigmond,Waylon Jennings,Kathy Mattea,Carlene Carter,Vince Gill,Janis Oliver Gill,William Smith,Chuck Hart,Doug McClure,Henry Darrow,Michael Paul Chan,Richard Blum,Bert Remsen,Robert Fuller,Donal Gibson,William Marshall,Bill Henderson,Cal Bartlett,Sam Dolan,Linda Hunt,Charles Dierkop,James Drury,John Fogerty,Michael Forte,Patrick Fullerton,Jack Garner,Danny Glover,Will Hutchins,Bob Jennings,Rick Jensen,Margot Kidder,Reba McEntire,John Otrin,Don Stark
+ Directors: Steven Soderbergh, Writers: Steven Soderbergh, Actors: Scott Allen,Betsy Brantley,Marcus Lyle Brown,Silas Cooper,C.C. Courtney,Sonny Cranch,Ann Dalrymple,Darrin Dickerson,Andre Dubroc,Ann Hamilton,John Hardy,Coleman Hough,Lori Jefferson,Eddie Jemison,David Jensen,Rodger Kamenetz,Katherine LaNasa,Margaret Lawhon,Mike Malone,Cristin McAlister,John Mese,L. Christian Mixon,Linda Mixon,Liann Pattison,Steven Soderbergh,Ronnie Stutes
 
- Runtimes: 127, Countries: USA, Languages: English, Certificates: Argentina:Atp,Australia:PG,Australia:M::(TV rating),Canada:PG::(Manitoba/Nova Scotia/Ontario),Canada:G::(Quebec),Chile:TE,Finland:K-10,Germany:12,Iceland:L,Peru:PT,Portugal:M/12,Singapore:PG,South Korea:12,Spain:T,Sweden:11,UK:PG,USA:PG
+ Runtimes: 96, Countries: USA, Languages: English,Japanese,Italian,French, Certificates: Italy:T,UK:15,USA:Not Rated
 
- Plot: Maverick is recreated from the character James Garner created in the 1950s TV program. Maverick is a gambler who would rather con someone than fight them. He needs an additional three thousand dollars in order to enter a Winner Take All poker game that begins in a few days. He tries to win some, tries to collect a few debts, and recover a little loot for the reward, all with a light hearted air. He joins forces with a woman gambler with a marvelous, though fake, southern accent as the two both try and enter the game.
+ Plot: Fletcher Munson is a lethargic, passive worker for a Scientology-like self-help corporation called Eventualism. After the death of a colleague, he is promoted to the job of writing speeches for T. Azimuth Schwitters, the founder and head of the group. He uses this as an excuse to be emotionally and romantically distant from his wife, who, he discovers, is having an affair with his doppelganger, a dentist named Dr. Jeffrey Korchek. As Munson fumbles with the speech and Korchek becomes obsessed with a new patient, a psychotic exterminator named Elmo Oxygen goes around the town seducing lonely wives and taking photographs of his genitals.
+
 ```
 User Example:
 ```
-UserID: 1 Age: 24 Gender: M Occupation: technician zip: 85711
-UserID: 2 Age: 53 Gender: F Occupation: other zip: 94043
-UserID: 3 Age: 23 Gender: M Occupation: writer zip: 32067
+, User: 766 rates Movie: 419 (3.0 / 5)
+, User: 379 rates Movie: 339 (3.0 / 5)
+, User: 698 rates Movie: 507 (4.0 / 5)
+, User: 828 rates Movie: 19 (5.0 / 5)
+, User: 780 rates Movie: 508 (3.0 / 5)
+, User: 294 rates Movie: 123 (4.0 / 5)
 ```
 
 Rating Example:
 ```
-User: 295 rates Movie: 190 (4.0 / 5)
-User: 224 rates Movie: 69 (4.0 / 5)
-User: 272 rates Movie: 317 (4.0 / 5)
-User: 221 rates Movie: 1010 (3.0 / 5)
+, User: 752 rates Movie: 1243 (4.0 / 5)
+, User: 854 rates Movie: 89 (4.0 / 5)
+, User: 764 rates Movie: 318 (5.0 / 5)
+, User: 733 rates Movie: 1132 (4.0 / 5
 ```
-Currently, TrainingData is contructed by Rating, User and Movie.
+Currently, TrainingData is contructed by Rating(Seq), User(HashMap) and Movie(HashMap).
 PreparedData is the same as TrainingData (not null any more)
 
-TODO parsing Date, deal with String Runtimes and zipcode, use array/list to store actors, directors and writers(?), deal with multiple countries and languages in one movie...
+
+```
+This is the featureCounts in FeatureBasedAlgorithm.scala
+
+Map(Animation -> 42, Thriller -> 251, War -> 71, Horror -> 92, Documentary -> 50, Comedy -> 505, Western -> 27, Fantasy -> 22, Romance -> 247, Drama -> 725, Childrens -> 122, Mystery -> 61, Musical -> 56, FilmNoir -> 24, SciFi -> 101, Adventure -> 135, Unknown -> 2, Crime -> 109, Action -> 251)
+
+````
+To run/test:
+Make sure you train with "-ap featureBasedAlgorithm.json"
+curl -i -X POST http://localhost:9997/queries.json -d '{"uid":"12", "mids":["46", "4", "5"]}'
+Query now is a combination of a String(uid) and a Seq[String(mid)].
+
+Output: {"movies":[{"46":0.0},{"4":0.0},{"5":0.0}],"isOriginal":true}
+Since the algorithm is not working right now, maybe, not tested/adapted yet.
+
+TODO: work on the algorithms
+
+`````
+TODO deal with String Runtimes and zipcode, use array/list to store actors, directors and writers(?), deal with multiple countries and languages in one movie...
+Adding actors, directors ... to itypes
+
+Parse Plot 
+keywords searching => itypes
+
+```
+
 
 
 ## After deploy, you can get predictions

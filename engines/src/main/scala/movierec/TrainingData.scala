@@ -1,37 +1,32 @@
 package io.prediction.engines.movierec
 
 import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.HashMap
 
 class TrainingData (
     val ratings: Seq[Rating],
-    val users:   Seq[User],
-    var movies:  Seq[Movie]
+    val users:   HashMap[Int, User],
+    var movies:  HashMap[Int, Movie]
   ) extends Serializable {
 
-  override def toString(): String = {
-    if (ratings.length > 20) {
-      "TrainingData.size=" + ratings.length
-    } else {
-      ratings.toString
-    }
-  }
+  override def toString = s"TrainingData:" +
+      s"U: [${users.size}] (${users.take(943)}...) " +
+      s"M: [${movies.size}] (${movies.take(1628)}...) " +
+      s"R: [${ratings.size}] (${ratings.take(100000)}...)"
 }
 
 // TODO: Determine if we need to prepare training data
 // currently it's the same as training data
 class PreparedData (
     val ratings: Seq[Rating],
-    val users:   Seq[User],
-    var movies:  Seq[Movie]
+    val users:   HashMap[Int, User],
+    var movies:  HashMap[Int, Movie]
   ) extends Serializable {
 
-  override def toString(): String = {
-    if (ratings.length > 20) {
-      "TrainingData.size=" + ratings.length
-    } else {
-      ratings.toString
-    }
-  }
+  override def toString = s"PreparedData:" +
+      s"U: [${users.size}] (${users.take(943)}...) " +
+      s"M: [${movies.size}] (${movies.take(1628)}...) " +
+      s"R: [${ratings.size}] (${ratings.take(100000)}...)"
 }
 
 class Rating(
@@ -39,7 +34,7 @@ class Rating(
     val mid:    Int,
     val rating: Float
   ) extends Serializable {
-  override def toString() = "User: " + uid + " rates Movie: " + mid + " (" + rating + " / 5)"
+  override def toString() = "User: " + uid + " rates Movie: " + mid + " (" + rating + " / 5)\n"
 }
 
 
@@ -52,7 +47,7 @@ class User(//UserTD
   ) extends Serializable {
   override def toString() = "UserID: " + uid + ", Age: " + age +
                             ", Gender: " + gender + ", Occupation: " +
-                            occupation + ", Zip: " + zip
+                            occupation + ", Zip: " + zip + "\n"
 }
 
 // movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) |
@@ -77,7 +72,7 @@ class Movie(//ItemTD
     val certificates: String,
     val plot: String
   ) extends Serializable {
-  override def toString() = ">>Movie: " + title + ", ID: " + mid +
+  override def toString() = "\nMovie: " + title + ", ID: " + mid +
                             ", ReleaseDate: " + releaseDate +
                             ", Genre: " + genre.toBinaryString +
                             ", Itypes: " + itypes +

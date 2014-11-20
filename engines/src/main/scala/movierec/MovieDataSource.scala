@@ -85,20 +85,16 @@ class MovieDataSource(params: MovieDataSourceParams)
 
             //println("end of genre")
             //5+i directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot
-            if(i+7 < line.size){
-
+            try{
               println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
                         line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7)).toString())
               new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
                         line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7))
-            }else{
-              // Current data is not done (missing data), so in order to compile and run
-              i=2
-              println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
-                      line(i), line(i), line(i), line(i), line(i), line(i)).toString())
-            new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
-                      line(i), line(i), line(i), line(i), line(i), line(i))
+            }catch{
+              case e: Exception => println("DATA PARSING ERROR or Exception Caught: " + e)
 
+              new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
+                      line(i), line(i), line(i), line(i), line(i), line(i))
             }
         }
     println("DONE MOVIES FILE. FINISHED ALL")

@@ -10,8 +10,6 @@ import io.prediction.controller.LDataSource
 import scala.io.Source
 import scala.collection.mutable.ListBuffer
 
-
-
 class MovieDataSourceParams(
     /*val appId: Int,
     // default None to include all itypes
@@ -51,7 +49,7 @@ class MovieDataSource(params: MovieDataSourceParams)
     }
   }
 
-  // TODO Maybe We need to trim()?
+  // TODO: Maybe We need to trim()?
   override def read(): Seq[(EmptyParams, TrainingData, Seq[(Query, Actual)])] = {
     val delim = "[\t|]"
     log("START READING FILES")
@@ -60,7 +58,7 @@ class MovieDataSource(params: MovieDataSourceParams)
         .toList.map { it =>
             val line = it.split(delim)
             val r = new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
-            log(r.toString())
+            log(r.toString)
             r
         }
     log("DONE RATING FILE")
@@ -68,50 +66,48 @@ class MovieDataSource(params: MovieDataSourceParams)
     val users = Source.fromFile(params.usersFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            val u = new User(line(0), line(1).toInt, line(2),
-                             line(3), line(4))
-            log(u.toString())
+            val u = new User(line(0), line(1).toInt, line(2), line(3), line(4))
+            log(u.toString)
             (line(0).toInt, u)
         }.toMap
     log("DONE USERS FILE")
 
-    // movie id | movie title | release date | video release date (TODO) |
-    // IMDb URL (TODO) | unknown 5 | Action | Adventure | Animation |
-    // Children's | Comedy | Crime | Documentary | Drama | Fantasy |
-    // Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
-    // Thriller | War | Western |
+    // MOVIE DATA SOURCE FORMAT:
+    // movie id | movie title | release date | video release date (TODO)
+    // | IMDb URL (TODO) | genre's binary list | directors | writers | actors
+    // | runtimes (minutes) | countries | languages | certificates | plot
 
-    //To avoid java.nio.charset.MalformedInputException
+    // To avoid java.nio.charset.MalformedInputException
     val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()
         .toList.map { it =>
-            val line = it.split(delim)// TODO Genre parsing and Data parsing
-            var i = 5 + Genre.numGenres
+            val line = it.split(delim)
 
-            val genre = new Genre(line.slice(5, i))
-            val seq_itypes = genre.getGenreList.toSeq
+            // starting position of other attributes after genre's binary list
+            var pos = 5 + Genre.numGenres
+
+            val genre = new Genre(line.slice(5, pos))
+            val genreSeq = genre.getGenreSeq
             val genreInt = genre.getGenreInt
 
-            // log("end of genre")
-            // 5+i directors | writers | actors | runtimes (in minutes) |
-            // countries | languages | certificates | plot
-            if( i + 7 < line.size){
-              val m = new Movie(line(0), line(1), line(2),
-                                genreInt, seq_itypes, line(i), line(i+1),
-                                line(i+2), line(i+3), line(i+4), line(i+5),
-                                line(i+6), line(i+7))
-              log(m.toString())
-              (line(0).toInt, m)
+            var m: Movie = null
+            try {
+              m = new Movie(line(0), line(1), line(2), genreInt, genreSeq,
+                            line(pos),   line(pos+1), line(pos+2), line(pos+3),
+                            line(pos+4), line(pos+5), line(pos+6), line(pos+7))
             }
-            else {
-              // Current data is not done (missing data)
-              // so in order to compile and run
-              i = 2
-              val m = new Movie(line(0), line(1), line(2),
-                                genreInt, seq_itypes, line(i), line(i), line(i),
-                                line(i), line(i), line(i), line(i), line(i))
-              log(m.toString())
-              (line(0).toInt, m)
+            catch {
+              // some movies might have missing fields
+              case e: Exception =>
+                println("DATA PARSING ERROR or Exception Caught: " + e)
+
+                val ph = "_" // placeholder for missing fields
+                m = new Movie(line(0), line(1), line(2), genreInt, genreSeq,
+                              ph, ph, ph, ph, ph, ph, ph, ph)
             }
+
+            log(m.toString)
+
+            (line(0).toInt, m)
         }.toMap
     log("DONE MOVIES FILE. FINISHED ALL")
 

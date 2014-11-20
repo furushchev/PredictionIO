@@ -4,9 +4,9 @@ import io.prediction.engines.base
 
 case class Query (
     val uid: String,
-    val mids: Seq[String]
+    val iids: Seq[String]
   ) extends Serializable {
-  override def toString() = s"[${uid}, ${mids}]"
+  override def toString() = s"[${uid}, ${iids}]"
 }
 
 case class Prediction (

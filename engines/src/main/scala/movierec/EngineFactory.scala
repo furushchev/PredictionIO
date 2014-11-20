@@ -11,7 +11,7 @@ object MovieRecEngine extends IEngineFactory {
       classOf[MovieRecPreparator],
       Map(
         "rand" -> classOf[RandomAlgorithm],
-        "movieRecAlgorithm" -> classOf[MovieRecAlgorithm],
+        "movierec" -> classOf[MovieRecAlgorithm],
         "featurebased" -> classOf[FeatureBasedAlgorithm]
         ),
       classOf[MovieRecServing]

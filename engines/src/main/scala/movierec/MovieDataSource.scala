@@ -45,36 +45,44 @@ class MovieDataSource(params: MovieDataSourceParams)
     Query,
     Actual] {
 
+  def log(str: String) {
+    if (false) {
+      println(str)
+    }
+  }
+
   // TODO Maybe We need to trim()?
   override def read(): Seq[(EmptyParams, TrainingData, Seq[(Query, Actual)])] = {
     val delim = "[\t|]"
-    println("START READING FILES")
-
-    //def getCurrentDirectory = new java.io.File( "." ).getCanonicalPath //Used to print curr directory
-    //println(getCurrentDirectory)///home/beth/MovieLens/PredictionIO/engines
+    log("START READING FILES")
 
     val ratings = Source.fromFile(params.ratingsFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            println(new Rating(line(0).toInt, line(1).toInt, line(2).toFloat).toString())
-            new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
+            val r = new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
+            log(r.toString())
+            r
         }
-    println("DONE RATING FILE")
+    log("DONE RATING FILE")
 
     val users = Source.fromFile(params.usersFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            println(new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4)).toString())
-            new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4))
-        }
-    println("DONE USERS FILE")
+            val u = new User(line(0), line(1).toInt, line(2),
+                             line(3), line(4))
+            log(u.toString())
+            (line(0).toInt, u)
+        }.toMap
+    log("DONE USERS FILE")
 
-    // movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) |
-    //unknown 5 | Action | Adventure | Animation | Children's | Comedy | Crime | Documentary |
-    //Drama | Fantasy |Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
-    //Thriller | War | Western |
+    // movie id | movie title | release date | video release date (TODO) |
+    // IMDb URL (TODO) | unknown 5 | Action | Adventure | Animation |
+    // Children's | Comedy | Crime | Documentary | Drama | Fantasy |
+    // Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
+    // Thriller | War | Western |
 
-    val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()//To avoid java.nio.charset.MalformedInputException
+    //To avoid java.nio.charset.MalformedInputException
+    val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()
         .toList.map { it =>
             val line = it.split(delim)// TODO Genre parsing and Data parsing
             var i = 5 + Genre.numGenres
@@ -83,26 +91,29 @@ class MovieDataSource(params: MovieDataSourceParams)
             val seq_itypes = genre.getGenreList.toSeq
             val genreInt = genre.getGenreInt
 
-            //println("end of genre")
-            //5+i directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot
-            if(i+7 < line.size){
-
-              println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
-                        line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7)).toString())
-              new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
-                        line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7))
-            }else{
-              // Current data is not done (missing data), so in order to compile and run
-              i=2
-              println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
-                      line(i), line(i), line(i), line(i), line(i), line(i)).toString())
-            new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
-                      line(i), line(i), line(i), line(i), line(i), line(i))
-
+            // log("end of genre")
+            // 5+i directors | writers | actors | runtimes (in minutes) |
+            // countries | languages | certificates | plot
+            if( i + 7 < line.size){
+              val m = new Movie(line(0), line(1), line(2),
+                                genreInt, seq_itypes, line(i), line(i+1),
+                                line(i+2), line(i+3), line(i+4), line(i+5),
+                                line(i+6), line(i+7))
+              log(m.toString())
+              (line(0).toInt, m)
             }
-        }
-    println("DONE MOVIES FILE. FINISHED ALL")
-
+            else {
+              // Current data is not done (missing data)
+              // so in order to compile and run
+              i = 2
+              val m = new Movie(line(0), line(1), line(2),
+                                genreInt, seq_itypes, line(i), line(i), line(i),
+                                line(i), line(i), line(i), line(i), line(i))
+              log(m.toString())
+              (line(0).toInt, m)
+            }
+        }.toMap
+    log("DONE MOVIES FILE. FINISHED ALL")
 
     val data = new TrainingData(ratings, users, movies);
     return Seq((null.asInstanceOf[EmptyParams], data, Seq[(Query, Actual)]()))

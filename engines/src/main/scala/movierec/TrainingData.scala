@@ -3,9 +3,9 @@ package io.prediction.engines.movierec
 import scala.collection.mutable.ListBuffer
 
 class TrainingData (
-    val ratings: Seq[Rating],
-    val users:   Seq[User],
-    var movies:  Seq[Movie]
+    val ratings: List[Rating],
+    val users:   Map[Int, User],
+    var movies:  Map[Int, Movie]
   ) extends Serializable {
 
   override def toString(): String = {
@@ -20,14 +20,14 @@ class TrainingData (
 // TODO: Determine if we need to prepare training data
 // currently it's the same as training data
 class PreparedData (
-    val ratings: Seq[Rating],
-    val users:   Seq[User],
-    var movies:  Seq[Movie]
+    val ratings: List[Rating],
+    val users:   Map[Int, User],
+    var movies:  Map[Int, Movie]
   ) extends Serializable {
 
   override def toString(): String = {
     if (ratings.length > 20) {
-      "TrainingData.size=" + ratings.length
+      "PreparedData.size=" + ratings.length
     } else {
       ratings.toString
     }
@@ -44,7 +44,7 @@ class Rating(
 
 
 class User(//UserTD
-    val uid: Int,
+    val uid: String,
     val age: Int,
     val gender: String,
     val occupation: String,
@@ -63,12 +63,12 @@ class User(//UserTD
  //directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot
 
 class Movie(//ItemTD
-    val mid: Int,
+    val mid: String,
     val title: String,
     val releaseDate: String, //TODO Date type
     val genre: Int,
-    val itypes: Seq[String],
-    val directors: String,// TODO separate directors, writers and actors into list/array...
+    val mgenres: Seq[String],
+    val directors: String,// @TODO separate directors, writers and actors into list/array...
     val writers: String,
     val actors: String,
     val runtimes: String, // in minutes TODO string for now due to Canada:108
@@ -80,7 +80,7 @@ class Movie(//ItemTD
   override def toString() = ">>Movie: " + title + ", ID: " + mid +
                             ", ReleaseDate: " + releaseDate +
                             ", Genre: " + genre.toBinaryString +
-                            ", Itypes: " + itypes +
+                            ", Itypes: " + mgenres +
                             "\n\n Directors: " + directors +
                             ", Writers: " + writers +
                             ", Actors: " + actors +
@@ -93,15 +93,15 @@ class Movie(//ItemTD
 
 object Genre {
 
-  val itypes = Array("Unknown", "Action", "Adventure", "Animation",
+  val mgenres = Array("Unknown", "Action", "Adventure", "Animation",
                 "Childrens", "Comedy", "Crime", "Documentary", "Drama",
                 "Fantasy", "FilmNoir", "Horror", "Musical", "Mystery",
                 "Romance", "SciFi", "Thriller", "War", "Western")
 
-  val numGenres = itypes.size
+  val numGenres = mgenres.size
 
   // if needed
-  // val gmap = itypes.zipWithIndex.toMap
+  // val gmap = mgenres.zipWithIndex.toMap
 }
 
 class Genre(binaryGenreList: Array[String]) {
@@ -109,11 +109,10 @@ class Genre(binaryGenreList: Array[String]) {
   val (genreList: List[String], genreInt: Int) = {
     var gi = 0
     var gl = new ListBuffer[String]()
-    var i = 0
-    for(i <- 0 to Genre.itypes.size-1) {
+    for(i <- 0 until Genre.mgenres.size) {
       val bit = binaryGenreList(i).toInt & 1
       if (bit == 1) {
-        gl += Genre.itypes(i)
+        gl += Genre.mgenres(i)
       }
       gi |= bit << i
     }

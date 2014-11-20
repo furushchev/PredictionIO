@@ -3,15 +3,16 @@ package io.prediction.engines.movierec
 import io.prediction.engines.base
 
 case class Query (
-    val uid: Int, // user ID
-    val mid: Int  // movie ID
+    val uid: String,
+    val mids: Seq[String]
   ) extends Serializable {
-  override def toString() = s"[${uid}, ${mid}]"
+  override def toString() = s"[${uid}, ${mids}]"
 }
 
 case class Prediction (
     // the ranked iid with score
-    val items: Seq[(String, Double)]
+    val items: Seq[(String, Double)],
+    val isOriginal: Boolean = false
   ) extends Serializable {
   override def toString = s"${items}"
 }

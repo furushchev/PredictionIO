@@ -99,15 +99,29 @@ class FeatureBasedAlgorithm
   def predict(model: FeatureBasedModel, query: Query): Prediction = {
     val (movies, isOriginal): (Seq[(String, Double)], Boolean) = (
       if (model.userClassifierMap.contains(query.uid)) {
-        val movies: Seq[(String, Double)] = query.mids
-        .map { mid => {
-          if (model.movieFeaturesMap.contains(mid)) {
-            (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
-          } else {
-            (mid, 0.0) // movie not found
-          }
-        }}
-        .sortBy(-_._2)
+        var movies: Seq[(String, Double)] = null
+        if (query.mids.size > 0) {
+          movies = query.mids
+            .map { mid => {
+              if (model.movieFeaturesMap.contains(mid)) {
+                (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
+              } else {
+                (mid, 0.0) // movie not found
+              }
+            }}
+            .sortBy(-_._2)
+        }
+        else {
+          // get top 10 movies
+          movies =
+            (for { mid <- model.movieFeaturesMap.keySet }
+              yield (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
+            )
+            .toSeq
+            .sortBy(-_._2)
+            .take(10)
+        }
+
         (movies, false)
       } else {
         // if user not found, use input order.

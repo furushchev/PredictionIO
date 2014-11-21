@@ -88,6 +88,13 @@ curl -i -X POST http://localhost:8000/queries.json \
 curl -i -X POST http://localhost:8000/queries.json \
 -d '{
   "uid" : "2",
-  "top" : 5
+  "top" : [5]
 }'
+
+// null result
+curl -i -X POST http://localhost:8000/queries.json \
+-d '{
+  "uid" : "2"
+}'
+output: {"movies":null,"isOriginal":false}
 ```

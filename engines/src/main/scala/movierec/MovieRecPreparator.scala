@@ -13,7 +13,8 @@ class MovieRecPreparator()
       .map{ case(mindex, movie) =>
         val mtypes: Seq[String] =
             Seq(Seq(movie.year), movie.genre.getGenreList,
-                //movie.directors, movie.writers, movie.actors, movie.countries,
+                movie.directors, movie.writers,
+                //movie.actors, movie.countries,
                 movie.languages).flatten
 
         // println(movie.mid + " " + mtypes.toString)

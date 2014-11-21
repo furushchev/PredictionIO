@@ -111,15 +111,14 @@ class FeatureBasedAlgorithm
             }}
             .sortBy(-_._2)
         }
-        else { // no mids supplied
-          // get top ${top} movies
+        else if (query.top.size > 0) { // get top ${top} movies
           movies =
             (for { mid <- model.movieFeaturesMap.keySet }
               yield (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
             )
             .toSeq
             .sortBy(-_._2)
-            .take(query.top)
+            .take(query.top.head)
         }
 
         (movies, false)

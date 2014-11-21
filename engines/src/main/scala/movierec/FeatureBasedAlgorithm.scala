@@ -31,57 +31,57 @@ case class FeatureBasedModel(
   val features: Array[String] = Array[String](),
   val userClassifierMap: Map[String, NaiveBayes[Boolean, String]] =
     Map[String, NaiveBayes[Boolean, String]](),
-  val itemFeaturesMap: Map[String, Counter[String, Double]] =
+  val movieFeaturesMap: Map[String, Counter[String, Double]] =
     Map[String, Counter[String, Double]]())
 extends Serializable {
   override def toString = "FeatureBasedModel: " +
     s"features (size = ${features.size}) = [${features.take(3).toSeq}, ...], " +
     s"userClassifierMap (size = ${userClassifierMap.size}) " +
     s"= {${userClassifierMap.take(3).toSeq}, ...}, " +
-    s"itemFeaturesMap (size = ${itemFeaturesMap.size}) " +
-    s"= {${itemFeaturesMap.take(3).toSeq}, ...}"
+    s"movieFeaturesMap (size = ${movieFeaturesMap.size}) " +
+    s"= {${movieFeaturesMap.take(3).toSeq}, ...}"
 }
 
-// FeatureBaseAlgorithm use all itypes as features.
+// FeatureBaseAlgorithm use all mtypes as features.
 class FeatureBasedAlgorithm
-  extends LAlgorithm[EmptyParam, PreparedData, FeatureBasedModel,
+  extends LAlgorithm[EmptyParams, PreparedData, FeatureBasedModel,
       Query, Prediction] {
 
   def train(data: PreparedData): FeatureBasedModel = {
-    val featureCounts = data.items
-      .flatMap{ case(iindex, item) => item.itypes }
+    val featureCounts = data.movies
+      .flatMap{ case(mindex, movie) => movie.mtypes }
       .groupBy(identity)
       .mapValues(_.size)
 
     val features: Seq[String] = featureCounts.toSeq.sortBy(-_._2).map(_._1)
 
     // one model/classifier for each user in Naive Bayes
-    val itemsSet = data.items.keySet
-    // Map from uid to iid that user bought
-    val conversionsMap: Map[Int, Set[Int]] = data.rating.groupBy(_.uindex)
-      .mapValues(_.map(_.iindex).toSet)
+    val moviesSet = data.movies.keySet
+    // Map from uid to mid that user bought
+    val conversionsMap: Map[Int, Set[Int]] = data.ratings.groupBy(_.uindex)
+      .mapValues(_.map(_.mindex).toSet)
 
-    // iindex to feature counter map
-    val itemFeaturesMap: Map[String, Counter[String, Double]] =
-    data.items.map { case(iindex, item) => {
+    // mindex to feature counter map
+    val movieFeaturesMap: Map[String, Counter[String, Double]] =
+    data.movies.map { case(mindex, movie) => {
       val features = Counter[String, Double]()
-      for (itype <- item.itypes) {
-        features(itype) = 1.0
+      for (mtype <- movie.mtypes) {
+        features(mtype) = 1.0
       }
-      (data.items(iindex).iid, features)
+      (data.movies(mindex).mid, features)
     }}
     .toMap
 
     val trainer = new NaiveBayes.Trainer[Boolean, String]
 
     val userClassifierMap: Map[String, NaiveBayes[Boolean, String]] =
-    conversionsMap.map { case (uindex, iindicies) => {
+    conversionsMap.map { case (uindex, mindicies) => {
 
       // Construct the iterable for training a model for this user
       val positiveExamples: Seq[Example[Boolean, Counter[String, Double]]] =
-        iindicies.map { iindex => Example(label=true, features=itemFeaturesMap(data.items(iindex).iid)) }.toSeq
+        mindicies.map { mindex => Example(label=true, features=movieFeaturesMap(data.movies(mindex).mid)) }.toSeq
       val negativeExamples: Seq[Example[Boolean, Counter[String, Double]]] =
-        (itemsSet -- iindicies).filter(_ % 101 == uindex % 101).map { iindex => Example(label=false, features=itemFeaturesMap(data.items(iindex).iid)) }.toSeq
+        (moviesSet -- mindicies).filter(_ % 101 == uindex % 101).map { mindex => Example(label=false, features=movieFeaturesMap(data.movies(mindex).mid)) }.toSeq
       val examples = positiveExamples ++ negativeExamples
 
       // build the model
@@ -92,28 +92,28 @@ class FeatureBasedAlgorithm
     FeatureBasedModel(
       featureCounts.keys.toArray,
       userClassifierMap,
-      itemFeaturesMap
+      movieFeaturesMap
     )
   }
 
   def predict(model: FeatureBasedModel, query: Query): Prediction = {
-    val (items, isOriginal): (Seq[(String, Double)], Boolean) = (
+    val (movies, isOriginal): (Seq[(String, Double)], Boolean) = (
       if (model.userClassifierMap.contains(query.uid)) {
-        val items: Seq[(String, Double)] = query.iids
-        .map { iid => {
-          if (model.itemFeaturesMap.contains(iid)) {
-            (iid, model.userClassifierMap(query.uid).scores(model.itemFeaturesMap(iid))(true))
+        val movies: Seq[(String, Double)] = query.mids
+        .map { mid => {
+          if (model.movieFeaturesMap.contains(mid)) {
+            (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
           } else {
-            (iid, 0.0) // item not found
+            (mid, 0.0) // movie not found
           }
         }}
         .sortBy(-_._2)
-        (items, false)
+        (movies, false)
       } else {
         // if user not found, use input order.
-        (query.iids.map { iid => (iid, 0.0) }, true)
+        (query.mids.map { mid => (mid, 0.0) }, true)
       }
     )
-    new Prediction(items, isOriginal)
+    new Prediction(movies, isOriginal)
   }
 }

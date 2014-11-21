@@ -36,66 +36,36 @@ $ $PIO_HOME/bin/pio register
 $ $PIO_HOME/bin/pio train -ap **ONE_OF_THE_ALGO**.json
 ```
 
-## Output statement of pio train
+## Outputs from MovieDataSource
 Movie Example:
 ```
-, 1593 -> 
-Movie: Death in Brunswick (1991), ID: 1593, ReleaseDate: 16-Aug-1996, Genre: 100000, Itypes: List(Comedy)
+>>Movie: Men With Guns (1997), ID: 1646, Year: 1998, Genre: 100000010
 
- Directors: Steven Soderbergh, Writers: Steven Soderbergh, Actors: Scott Allen,Betsy Brantley,Marcus Lyle Brown,Silas Cooper,C.C. Courtney,Sonny Cranch,Ann Dalrymple,Darrin Dickerson,Andre Dubroc,Ann Hamilton,John Hardy,Coleman Hough,Lori Jefferson,Eddie Jemison,David Jensen,Rodger Kamenetz,Katherine LaNasa,Margaret Lawhon,Mike Malone,Cristin McAlister,John Mese,L. Christian Mixon,Linda Mixon,Liann Pattison,Steven Soderbergh,Ronnie Stutes
+    Directors: WrappedArray(Adrienne Shelly),
+    Writers: WrappedArray(Adrienne Shelly),
+    Actors: WrappedArray(Adrienne Shelly, Tim Guinee, Roger Rees, Louise Lasser, Hynden Walch, Jon Sklaroff, Paul Cassell, Chuck Montgomery, Dave Simonds, Melinda Wade, Pamela Gray, Brian Quirk, C.C. Loveheart, Shirl Bernheim, Elizabeth Newett, Garry Goodrow, Bobby Caravella, Bill Boggs, Elaine Lang, Jan Leslie Harding, Neil Deodhar, Trish Hunter, Kevin Cahoon, Emily Cutler, Kevin Hagan, Joey Golden, Mark Blum, Gordana Rashovich, Hugh Palmer, Harry Bugin, Lynn Clayton)
 
- Runtimes: 96, Countries: USA, Languages: English,Japanese,Italian,French, Certificates: Italy:T,UK:15,USA:Not Rated
+    Runtimes: Australia:80, Countries: WrappedArray(USA), Languages: WrappedArray(English), Certificates: WrappedArray(Australia:M)
 
- Plot: Fletcher Munson is a lethargic, passive worker for a Scientology-like self-help corporation called Eventualism. After the death of a colleague, he is promoted to the job of writing speeches for T. Azimuth Schwitters, the founder and head of the group. He uses this as an excuse to be emotionally and romantically distant from his wife, who, he discovers, is having an affair with his doppelganger, a dentist named Dr. Jeffrey Korchek. As Munson fumbles with the speech and Korchek becomes obsessed with a new patient, a psychotic exterminator named Elmo Oxygen goes around the town seducing lonely wives and taking photographs of his genitals.
+    Plot: Donna witnesses identical murders on the same street on different days. Is this a supernatural conspiracy or is she merely cracking up?
 
 ```
 User Example:
 ```
-, User: 766 rates Movie: 419 (3.0 / 5)
-, User: 379 rates Movie: 339 (3.0 / 5)
-, User: 698 rates Movie: 507 (4.0 / 5)
-, User: 828 rates Movie: 19 (5.0 / 5)
-, User: 780 rates Movie: 508 (3.0 / 5)
-, User: 294 rates Movie: 123 (4.0 / 5)
+UserID: 1, Age: 24, Gender: technician, Occupation: 85711, Zip: M
+UserID: 2, Age: 53, Gender: other, Occupation: 94043, Zip: F
+UserID: 3, Age: 23, Gender: writer, Occupation: 32067, Zip: M
+UserID: 4, Age: 24, Gender: technician, Occupation: 43537, Zip: M
+UserID: 5, Age: 33, Gender: other, Occupation: 15213, Zip: F
 ```
-
 Rating Example:
 ```
-, User: 752 rates Movie: 1243 (4.0 / 5)
-, User: 854 rates Movie: 89 (4.0 / 5)
-, User: 764 rates Movie: 318 (5.0 / 5)
-, User: 733 rates Movie: 1132 (4.0 / 5
+User: 196 rates Movie: 242 (3.0 / 5)
+User: 186 rates Movie: 302 (3.0 / 5)
+User: 22 rates Movie: 377 (1.0 / 5)
+User: 244 rates Movie: 51 (2.0 / 5)
+User: 166 rates Movie: 346 (1.0 / 5)
 ```
-Currently, TrainingData is contructed by Rating(Seq), User(HashMap) and Movie(HashMap).
-PreparedData is the same as TrainingData (not null any more)
-
-
-```
-This is the featureCounts in FeatureBasedAlgorithm.scala
-
-Map(Animation -> 42, Thriller -> 251, War -> 71, Horror -> 92, Documentary -> 50, Comedy -> 505, Western -> 27, Fantasy -> 22, Romance -> 247, Drama -> 725, Childrens -> 122, Mystery -> 61, Musical -> 56, FilmNoir -> 24, SciFi -> 101, Adventure -> 135, Unknown -> 2, Crime -> 109, Action -> 251)
-
-````
-To run/test:
-Make sure you train with "-ap featureBasedAlgorithm.json"
-curl -i -X POST http://localhost:9997/queries.json -d '{"uid":"12", "mids":["46", "4", "5"]}'
-Query now is a combination of a String(uid) and a Seq[String(mid)].
-
-Output: {"movies":[{"46":0.0},{"4":0.0},{"5":0.0}],"isOriginal":true}
-Since the algorithm is not working right now, maybe, not tested/adapted yet.
-
-TODO: work on the algorithms
-
-`````
-TODO deal with String Runtimes and zipcode, use array/list to store actors, directors and writers(?), deal with multiple countries and languages in one movie...
-Adding actors, directors ... to itypes
-
-Parse Plot 
-keywords searching => itypes
-
-```
-
-
 
 ## After deploy, you can get predictions
 
@@ -107,5 +77,9 @@ curl -i -X GET http://localhost:8000
 Get predictions
 e.g.
 ```
-curl -i -X POST http://localhost:8000/queries.json -d '{"uid": 12, "mid": 4}'
+curl -i -X POST http://localhost:8000/queries.json \
+-d '{
+  "uid" : "2",
+  "mids" : ["290", "297", "314", "50", "251", "292"]
+}'
 ```

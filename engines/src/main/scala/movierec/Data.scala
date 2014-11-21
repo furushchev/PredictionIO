@@ -4,17 +4,17 @@ import io.prediction.engines.base
 
 case class Query (
     val uid: String,
-    val iids: Seq[String]
+    val mids: Seq[String]
   ) extends Serializable {
-  override def toString() = s"[${uid}, ${iids}]"
+  override def toString() = s"[${uid}, ${mids}]"
 }
 
 case class Prediction (
     // the ranked iid with score
-    val items: Seq[(String, Double)],
+    val movies: Seq[(String, Double)],
     val isOriginal: Boolean = false
   ) extends Serializable {
-  override def toString = s"${items}"
+  override def toString = s"${movies}"
 }
 
 case class Actual(

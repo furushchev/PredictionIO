@@ -36,14 +36,14 @@ class Movie(
     val plot: String
   ) extends Serializable {
   override def toString = s"Movie: ${title}, ID: ${mid}, Year: ${year}" +
-                          s", Genre: ${genre.toString}" +
-                          s"\n\n\tDirectors: ${directors.toString}" +
-                          s",\n\tWriters: ${writers.toString}" +
-                          s",\n\tActors: ${actors.toString}" +
+                          s", Genre: ${genre}" +
+                          s"\n\n\tDirectors: ${directors}" +
+                          s",\n\tWriters: ${writers}" +
+                          s",\n\tActors: ${actors}" +
                           s"\n\n\tRuntimes: ${runtimes}" +
-                          s", Countries: ${countries.toString}" +
-                          s", Languages: ${languages.toString}" +
-                          s", Certificates: ${certificates.toString}" +
+                          s", Countries: ${countries}" +
+                          s", Languages: ${languages}" +
+                          s", Certificates: ${certificates}" +
                           s"\n\n\tPlot: ${plot}\n"
 }
 

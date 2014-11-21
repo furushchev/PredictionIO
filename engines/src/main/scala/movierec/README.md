@@ -77,9 +77,17 @@ curl -i -X GET http://localhost:8000
 Get predictions
 e.g.
 ```
+// rank movies
 curl -i -X POST http://localhost:8000/queries.json \
 -d '{
   "uid" : "2",
   "mids" : ["290", "297", "314", "50", "251", "292"]
+}'
+
+// recommend top 5 movies for users
+curl -i -X POST http://localhost:8000/queries.json \
+-d '{
+  "uid" : "2",
+  "top" : 5
 }'
 ```

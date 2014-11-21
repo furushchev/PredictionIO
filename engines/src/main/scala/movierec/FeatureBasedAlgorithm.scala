@@ -100,7 +100,7 @@ class FeatureBasedAlgorithm
     val (movies, isOriginal): (Seq[(String, Double)], Boolean) = (
       if (model.userClassifierMap.contains(query.uid)) {
         var movies: Seq[(String, Double)] = null
-        if (query.mids.size > 0) {
+        if (query.mids.size > 0) { // rank movies for a user
           movies = query.mids
             .map { mid => {
               if (model.movieFeaturesMap.contains(mid)) {
@@ -111,15 +111,15 @@ class FeatureBasedAlgorithm
             }}
             .sortBy(-_._2)
         }
-        else {
-          // get top 10 movies
+        else { // no mids supplied
+          // get top ${top} movies
           movies =
             (for { mid <- model.movieFeaturesMap.keySet }
               yield (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
             )
             .toSeq
             .sortBy(-_._2)
-            .take(10)
+            .take(query.top)
         }
 
         (movies, false)

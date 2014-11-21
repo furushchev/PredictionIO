@@ -1,9 +1,5 @@
 package io.prediction.engines.movierec
 
-//import io.prediction.controller.EmptyDataParams
-//import io.prediction.engines.base
-//import io.prediction.engines.base.HasName
-//import org.joda.time.DateTime
 import io.prediction.controller.EmptyParams
 import io.prediction.controller.Params
 import io.prediction.controller.LDataSource
@@ -24,7 +20,6 @@ class MovieDataSourceParams(
     val ratingsFilePath: String,
     val usersFilePath: String,
     val moviesFilePath: String
-  //) extends base.AbstractEventsDataSourceParams
   ) extends Params
 
 case class EvalParams(
@@ -35,7 +30,6 @@ case class EvalParams(
   )
 
 class MovieDataSource(params: MovieDataSourceParams)
-  //extends base.EventsDataSource[DataParams, Query, Actual](params) {
   extends LDataSource[
     MovieDataSourceParams,
     EmptyParams,
@@ -124,44 +118,4 @@ class MovieDataSource(params: MovieDataSourceParams)
          new TrainingData(ratings, users, movies),
          Seq[(Query, Actual)]()))
   }
-
-  /*override def generateQueryActualSeq(
-    users: Map[Int, base.UserTD],
-    items: Map[Int, base.ItemTD],
-    actions: Seq[base.U2IActionTD],
-    trainUntil: DateTime,
-    evalStart: DateTime,
-    evalUntil: DateTime): (DataParams, Seq[(Query, Actual)]) = {
-
-    require(
-      !params.evalParams.isEmpty,
-      "EventsDataSourceParams.evalParams must not be empty")
-
-    val evalParams = params.evalParams.get
-
-    val ui2uid: Map[Int, String] = users.mapValues(_.uid)
-    val ii2iid: Map[Int, String] = items.mapValues(_.iid)
-
-    val userActions: Map[Int, Seq[base.U2IActionTD]] =
-      actions.groupBy(_.uindex)
-
-    val allIids: Vector[String]  = actions.map(_.iindex)
-      .map(ii => ii2iid(ii))
-      .distinct
-      .sortBy(identity)
-      .toVector
-
-    val qaSeq: Seq[(Query, Actual)] = userActions.map { case (ui, actions) => {
-      val uid = ui2uid(ui)
-      val iids = actions.map(u2i => ii2iid(u2i.iindex))
-      val actionTuples = iids.zip(actions).map(e => (uid, e._1, e._2))
-      val n = (if (evalParams.queryN == -1) iids.size else evalParams.queryN)
-      val query = Query(uid = uid, n = n)
-      val actual = Actual(actionTuples = actionTuples, servedIids = allIids)
-      (query, actual)
-    }}
-    .toSeq
-
-    (new DataParams(trainUntil, evalStart, evalUntil), qaSeq)
-  }*/
 }

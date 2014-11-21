@@ -44,9 +44,9 @@ class MovieDataSource(params: MovieDataSourceParams)
     Actual] {
 
   private var logcount: Int  = 0
-  private val debug: Boolean = true
+  private val debug: Boolean = false
   def log(str: String) {
-    if (debug && logcount < 5) {
+    if (debug && logcount < 6) {
       println(str)
       logcount += 1
     }
@@ -66,9 +66,9 @@ class MovieDataSource(params: MovieDataSourceParams)
             log(r.toString)
             r
         }
+    logcount = 0
     log("DONE RATING FILE")
 
-    logcount = 0
     val users = Source.fromFile(params.usersFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
@@ -76,6 +76,7 @@ class MovieDataSource(params: MovieDataSourceParams)
             log(u.toString)
             (line(0).toInt, u)
         }.toMap
+    logcount = 0
     log("DONE USERS FILE")
 
     // MOVIE DATA SOURCE FORMAT:
@@ -83,7 +84,6 @@ class MovieDataSource(params: MovieDataSourceParams)
     // | IMDb URL (TODO) | genre's binary list | directors | writers | actors
     // | runtimes (minutes) | countries | languages | certificates | plot
 
-    logcount = 0
     // To avoid java.nio.charset.MalformedInputException
     val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()
         .toList.map { it =>
@@ -117,6 +117,7 @@ class MovieDataSource(params: MovieDataSourceParams)
             (line(0).toInt, movie)
         }.toMap
 
+    logcount = 0
     log("DONE MOVIES FILE. FINISHED ALL")
 
     Seq((null.asInstanceOf[EmptyParams],

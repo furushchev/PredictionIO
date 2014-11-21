@@ -43,17 +43,22 @@ class MovieDataSource(params: MovieDataSourceParams)
     Query,
     Actual] {
 
+  private var logcount: Int  = 0
+  private val debug: Boolean = true
   def log(str: String) {
-    if (false) {
+    if (debug && logcount < 5) {
       println(str)
+      logcount += 1
     }
   }
 
   // TODO: Maybe We need to trim()?
   override def read(): Seq[(EmptyParams, TrainingData, Seq[(Query, Actual)])] = {
     val delim = "[\t|]"
+    val subDelim = ","
     log("START READING FILES")
 
+    logcount = 0
     val ratings = Source.fromFile(params.ratingsFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
@@ -63,6 +68,7 @@ class MovieDataSource(params: MovieDataSourceParams)
         }
     log("DONE RATING FILE")
 
+    logcount = 0
     val users = Source.fromFile(params.usersFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
@@ -77,6 +83,7 @@ class MovieDataSource(params: MovieDataSourceParams)
     // | IMDb URL (TODO) | genre's binary list | directors | writers | actors
     // | runtimes (minutes) | countries | languages | certificates | plot
 
+    logcount = 0
     // To avoid java.nio.charset.MalformedInputException
     val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()
         .toList.map { it =>
@@ -86,33 +93,35 @@ class MovieDataSource(params: MovieDataSourceParams)
             var pos = 5 + Genre.numGenres
 
             val genre = new Genre(line.slice(5, pos))
-            val genreSeq = genre.getGenreSeq
-            val genreInt = genre.getGenreInt
 
-            var m: Movie = null
+            var movie: Movie = null
             try {
-              m = new Movie(line(0), line(1), line(2), genreInt, genreSeq,
-                            line(pos),   line(pos+1), line(pos+2), line(pos+3),
-                            line(pos+4), line(pos+5), line(pos+6), line(pos+7))
+              movie = new Movie(
+                    line(0), line(1), line(2).split("-")(2), genre,
+                    line(pos).split(subDelim), line(pos+1).split(subDelim),
+                    line(pos+2).split(subDelim), line(pos+3),
+                    line(pos+4).split(subDelim), line(pos+5).split(subDelim),
+                    line(pos+6).split(subDelim), line(pos+7))
             }
             catch {
               // some movies might have missing fields
               case e: Exception =>
                 println("DATA PARSING ERROR or Exception Caught: " + e)
 
-                val ph = "_" // placeholder for missing fields
-                m = new Movie(line(0), line(1), line(2), genreInt, genreSeq,
-                              ph, ph, ph, ph, ph, ph, ph, ph)
+                movie = new Movie(line(0), line(1), line(2), genre,
+                              Seq(), Seq(), Seq(), null, Seq(), Seq(), Seq(), null)
             }
 
-            log(m.toString)
+            log(movie.toString)
 
-            (line(0).toInt, m)
+            (line(0).toInt, movie)
         }.toMap
+
     log("DONE MOVIES FILE. FINISHED ALL")
 
-    val data = new TrainingData(ratings, users, movies);
-    return Seq((null.asInstanceOf[EmptyParams], data, Seq[(Query, Actual)]()))
+    Seq((null.asInstanceOf[EmptyParams],
+         new TrainingData(ratings, users, movies),
+         Seq[(Query, Actual)]()))
   }
 
   /*override def generateQueryActualSeq(

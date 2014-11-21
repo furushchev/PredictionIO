@@ -2,17 +2,25 @@ package io.prediction.engines.movierec
 
 import io.prediction.controller.LPreparator
 import io.prediction.controller.Params
+import io.prediction.controller.EmptyParams
 
-case class PreparatorParams (
-  val placeholder: Int
-) extends Params
+class MovieRecPreparator()
+    extends LPreparator[EmptyParams, TrainingData, PreparedData] {
 
-class MovieRecPreparator(pp: PreparatorParams)
-  extends LPreparator[PreparatorParams, TrainingData, PreparedData] {
+  override def prepare(td: TrainingData): PreparedData = {
 
-  override def prepare(trainingData: TrainingData): PreparedData = {
+    val preparedMovies: Map[Int, PreparedMovie] = td.movies
+      .map{ case(mindex, movie) =>
+        val mtypes: Seq[String] =
+            Seq(Seq(movie.year), movie.genre.getGenreList,
+                //movie.directors, movie.writers, movie.actors, movie.countries,
+                movie.languages).flatten
 
-    new PreparedData(trainingData.ratings, trainingData.users, trainingData.movies)
-    
+        // println(movie.mid + " " + mtypes.toString)
+
+        (mindex, new PreparedMovie(movie.mid, mtypes))
+      }
+
+    new PreparedData(td.ratings, td.users, preparedMovies)
   }
 }

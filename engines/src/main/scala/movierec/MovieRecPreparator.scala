@@ -10,7 +10,7 @@ class MovieRecPreparator()
   override def prepare(td: TrainingData): PreparedData = {
 
     val preparedMovies: Map[Int, PreparedMovie] = td.movies
-      .map{ case(mindex, movie) =>
+      .map{ case(mid, movie) =>
         val mtypes: Seq[String] =
             Seq(Seq(movie.year), movie.genre.getGenreList,
                 movie.directors, movie.writers,
@@ -19,7 +19,7 @@ class MovieRecPreparator()
 
         // println(movie.mid + " " + mtypes.toString)
 
-        (mindex, new PreparedMovie(movie.mid, mtypes))
+        (mid, new PreparedMovie(movie.mid, mtypes))
       }
 
     new PreparedData(td.ratings, td.users, preparedMovies)

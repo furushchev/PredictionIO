@@ -58,8 +58,8 @@ class FeatureBasedAlgorithm
     // one model/classifier for each user in Naive Bayes
     val moviesSet = data.movies.keySet
     // Map from uid to mid that user bought
-    val conversionsMap: Map[Int, Set[Int]] = data.ratings.groupBy(_.uid)
-      .mapValues(_.map(_.mid).toSet)
+    val conversionsMap: Map[Int, Set[Int]] = data.ratings.groupBy(_.uindex)
+      .mapValues(_.map(_.mindex).toSet)
 
     // mindex to feature counter map
     val movieFeaturesMap: Map[String, Counter[String, Double]] =

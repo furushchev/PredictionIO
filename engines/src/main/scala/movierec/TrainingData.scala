@@ -3,19 +3,19 @@ package io.prediction.engines.movierec
 import scala.collection.mutable.ListBuffer
 
 class Rating(
-    val uindex: Int,
-    val mindex: Int,
+    val uid: Int,
+    val mid: Int,
     val rating: Float
   ) extends Serializable {
-  override def toString = s"User: ${uindex} rates Movie: ${mindex} (${rating} / 5)"
+  override def toString = s"User: ${uid} rates Movie: ${mid} (${rating} / 5)"
 }
 
 class User(
     val uid: String,
     val age: Int,
-    val zip: String,
     val gender: String,
-    val occupation: String
+    val occupation: String,
+    val zip: String
   ) extends Serializable {
   override def toString = s"UserID: ${uid}, Age: ${age}, Gender: ${gender}" +
                           s", Occupation: ${occupation}, Zip: ${zip}"

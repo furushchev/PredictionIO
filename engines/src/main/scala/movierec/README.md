@@ -52,11 +52,11 @@ Movie Example:
 ```
 User Example:
 ```
-UserID: 1, Age: 24, Gender: technician, Occupation: 85711, Zip: M
-UserID: 2, Age: 53, Gender: other, Occupation: 94043, Zip: F
-UserID: 3, Age: 23, Gender: writer, Occupation: 32067, Zip: M
-UserID: 4, Age: 24, Gender: technician, Occupation: 43537, Zip: M
-UserID: 5, Age: 33, Gender: other, Occupation: 15213, Zip: F
+UserID: 1, Age: 24, Gender: M, Occupation: technician, Zip: 85711
+UserID: 2, Age: 53, Gender: F, Occupation: other, Zip: 94043
+UserID: 3, Age: 23, Gender: M, Occupation: writer, Zip: 32067
+UserID: 4, Age: 24, Gender: M, Occupation: technician, Zip: 43537
+UserID: 5, Age: 33, Gender: F, Occupation: other, Zip: 15213
 ```
 Rating Example:
 ```

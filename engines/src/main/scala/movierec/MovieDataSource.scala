@@ -38,9 +38,10 @@ class MovieDataSource(params: MovieDataSourceParams)
     Actual] {
 
   private var logcount: Int  = 0
-  private val debug: Boolean = false
+  private val DEBUG: Boolean = false
+  private val LOG_MAX: Int = 6
   def log(str: String) {
-    if (debug && logcount < 6) {
+    if (DEBUG & logcount < LOG_MAX) {
       println(str)
       logcount += 1
     }
@@ -72,6 +73,7 @@ class MovieDataSource(params: MovieDataSourceParams)
         }.toMap
     logcount = 0
     log("DONE USERS FILE")
+
 
     // MOVIE DATA SOURCE FORMAT:
     // movie id | movie title | release date | video release date (TODO)

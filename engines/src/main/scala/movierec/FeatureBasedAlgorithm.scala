@@ -15,6 +15,7 @@
 
 package io.prediction.engines.movierec
 
+import java.util.NoSuchElementException
 import io.prediction.controller._
 
 import nak.classify.NaiveBayes
@@ -28,6 +29,8 @@ import org.apache.spark.rdd.RDD
 
 import scala.collection.mutable.ListBuffer
 import scala.collection.mutable.HashMap
+
+
 
 // FIXME. For now, we don't save the model.
 case class FeatureBasedModel(
@@ -68,8 +71,6 @@ class FeatureBasedAlgorithm
     //+map(_._1): create list from key: e.g. (Animation, Unknown, ...) (First elem occurs most)
 
 
-
-    //println("BEFORE")
     val featureMovies: HashMap[String, ListBuffer[String]] = HashMap[String, ListBuffer[String]]()
 
     data.movies.map { case(mindex, movie) => {
@@ -93,8 +94,7 @@ class FeatureBasedAlgorithm
     .toMap
     //e.g. Map(Michael Apted -> List(730, 619, 729, 621, 620, 1248), 
 
-    //println(featureMoviesMap.toString)
-    //println("AFTER")  
+    //println(featureMoviesMap.toString)  
     
 
     // one model/classifier for each user in Naive Bayes
@@ -164,16 +164,24 @@ class FeatureBasedAlgorithm
             var i = 0
             for(i <- 0 until query.mtypes.size){
               //println("HERE: " + model.featureMoviesMap(query.mtypes(i)))
-              movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+              try{
+                movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+              }catch{
+                case e: NoSuchElementException => println("Exception on mtype parsing: " + movieIds.toString)
+              }
             }
           }else{// if(query.display.head == "Intersect"){
-            var i = 0
+            var i = 0 
             for(i <- 0 until query.mtypes.size){
-              println("HERE: " + model.featureMoviesMap(query.mtypes(i)))
-              if(i==0){
-                movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))
-              }else{
-                movieIds = movieIds intersect model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+              //println("HERE: " + model.featureMoviesMap(query.mtypes(i)))
+              try{
+                if(i==0){
+                  movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))
+                }else{
+                  movieIds = movieIds intersect model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+                }
+              }catch{
+                case e: NoSuchElementException => println("Exception on mtype parsing: " + movieIds.toString)
               }
             }       
           }

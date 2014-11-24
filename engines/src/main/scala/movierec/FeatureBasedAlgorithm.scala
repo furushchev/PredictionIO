@@ -26,20 +26,27 @@ import org.apache.spark.SparkContext
 import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 
+import scala.collection.mutable.ListBuffer
+import scala.collection.mutable.HashMap
+
 // FIXME. For now, we don't save the model.
 case class FeatureBasedModel(
   val features: Array[String] = Array[String](),
   val userClassifierMap: Map[String, NaiveBayes[Boolean, String]] =
     Map[String, NaiveBayes[Boolean, String]](),
   val movieFeaturesMap: Map[String, Counter[String, Double]] =
-    Map[String, Counter[String, Double]]())
+    Map[String, Counter[String, Double]](),
+  val featureMoviesMap: Map[String, Seq[String]] = 
+    Map[String, Seq[String]]())
 extends Serializable {
   override def toString = "FeatureBasedModel: " +
     s"features (size = ${features.size}) = [${features.take(3).toSeq}, ...], " +
     s"userClassifierMap (size = ${userClassifierMap.size}) " +
     s"= {${userClassifierMap.take(3).toSeq}, ...}, " +
     s"movieFeaturesMap (size = ${movieFeaturesMap.size}) " +
-    s"= {${movieFeaturesMap.take(3).toSeq}, ...}"
+    s"= {${movieFeaturesMap.take(3).toSeq}, ...}, " + 
+    s"featureMoviesMap (size = ${featureMoviesMap.size}) " +
+    s"= {${featureMoviesMap.take(3).toSeq}}"
 }
 
 // FeatureBaseAlgorithm use all mtypes as features.
@@ -49,11 +56,46 @@ class FeatureBasedAlgorithm
 
   def train(data: PreparedData): FeatureBasedModel = {
     val featureCounts = data.movies
-      .flatMap{ case(mindex, movie) => movie.mtypes }
-      .groupBy(identity)
-      .mapValues(_.size)
+      .flatMap{ case(mindex, movie) => movie.mtypes }// All mtypes strings together in ArrayBuffer
+      .groupBy(identity)// e.g. Map(Animation -> ArrayBuffer(Animation, Animation, Animation), ....
+      .mapValues(_.size)// e.g. Map(Animation -> 3, ...[3 is the number of Animations]
+
+
 
     val features: Seq[String] = featureCounts.toSeq.sortBy(-_._2).map(_._1)
+    //+toSeq:  e.g. ((Animation, 3), ...)
+    //+sortBy(-_._2) Decreasing Order Sort: e.g. ((Animation, 3), (Unknown, 2), ...)
+    //+map(_._1): create list from key: e.g. (Animation, Unknown, ...) (First elem occurs most)
+
+
+
+    //println("BEFORE")
+    val featureMovies: HashMap[String, ListBuffer[String]] = HashMap[String, ListBuffer[String]]()
+
+    data.movies.map { case(mindex, movie) => {
+      for(mtype <- movie.mtypes){
+        if(featureMovies.contains(mtype)){
+          val buf: ListBuffer[String] = featureMovies(mtype)
+          buf += movie.mid
+        }else{
+          val buf = new ListBuffer[String]()
+          buf += movie.mid
+          featureMovies.put(mtype, buf)
+        }
+      }
+    }}
+
+
+    val featureMoviesMap: Map[String, Seq[String]] =
+    featureMovies.map { case(feature, buf) => {
+      (feature, buf.toSeq)
+    }}
+    .toMap
+    //e.g. Map(Michael Apted -> List(730, 619, 729, 621, 620, 1248), 
+
+    //println(featureMoviesMap.toString)
+    //println("AFTER")  
+    
 
     // one model/classifier for each user in Naive Bayes
     val moviesSet = data.movies.keySet
@@ -92,7 +134,8 @@ class FeatureBasedAlgorithm
     FeatureBasedModel(
       featureCounts.keys.toArray,
       userClassifierMap,
-      movieFeaturesMap
+      movieFeaturesMap,
+      featureMoviesMap
     )
   }
 
@@ -110,6 +153,41 @@ class FeatureBasedAlgorithm
               }
             }}
             .sortBy(-_._2)
+        }
+        else if(query.mtypes.size > 0){
+          
+          var movieIds: ListBuffer[String] = new ListBuffer[String]()
+          var mids: Seq[String] = Seq[String]()
+
+          //var mids: Seq[String]
+          if(query.display.size == 0 || query.display.head == "Union"){//== "Union"){
+            var i = 0
+            for(i <- 0 until query.mtypes.size){
+              println("MIMI: " + model.featureMoviesMap(query.mtypes(i)))
+              movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+            }
+            mids = movieIds.toSeq
+          }else{
+            /*var i = 0
+            for(i <- 0 until query.mtypes.size){
+              println("MIMI: " + model.featureMoviesMap(query.mtypes(i)))
+              movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+            }
+            mids = movieIds.toSeq*/
+          }
+
+          //TODO: Remove duplicates in itypes for each movie
+          //i.e. input John Lasseter output List (1,1) because he is both director and writer of a movie
+
+          if (mids.size > 0) { // rank movies for a user
+            movies = mids
+              .map { mid => {
+                  (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
+              }
+            }         
+            .sortBy(-_._2)
+          }
+          
         }
         else if (query.top.size > 0) { // get top ${top} movies
           movies =

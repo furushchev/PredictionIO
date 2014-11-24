@@ -38,7 +38,7 @@ class MovieRecAlgorithm (params: MovieRecAlgorithmParams)
   override
   def predict(model: MovieRecModel, query: Query): Prediction = {
     return new Prediction(
-      movies = Seq(("Testing", 1))
+      movies = Seq(("Testing", 1)), false
       )
   }
 }

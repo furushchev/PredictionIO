@@ -5,15 +5,17 @@ import io.prediction.engines.base
 case class Query (
     val uid: String,
     val mids: Seq[String],
-    val top: Seq[Int] // Int cannot be ommited in query
+    val top: Seq[Int], // Int cannot be ommited in query
+    val mtypes: Seq[String],
+    val display: Seq[String] // Intersect or Union
   ) extends Serializable {
-  override def toString() = s"[${uid}, ${mids}, ${top}]"
+  override def toString() = s"[${uid}, ${mids}, ${top}, ${mtypes}, ${display}]"
 }
 
 case class Prediction (
     // the ranked iid with score
     val movies: Seq[(String, Double)],
-    val isOriginal: Boolean = false
+    val isOriginal: Boolean
   ) extends Serializable {
   override def toString = s"${movies}"
 }

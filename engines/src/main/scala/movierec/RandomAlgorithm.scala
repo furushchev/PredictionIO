@@ -25,7 +25,7 @@ class RandomAlgorithm(params: RandomAlgoParams)
     val rand = new Random(params.seed)
 
     new Prediction (
-      movies = Seq(("Random", rand.nextInt))
+      movies = Seq(("Random", rand.nextInt)), false
     )
   }
 }

@@ -64,7 +64,6 @@ class FeatureBasedAlgorithm
       .mapValues(_.size)// e.g. Map(Animation -> 3, ...[3 is the number of Animations]
 
 
-
     val features: Seq[String] = featureCounts.toSeq.sortBy(-_._2).map(_._1)
     //+toSeq:  e.g. ((Animation, 3), ...)
     //+sortBy(-_._2) Decreasing Order Sort: e.g. ((Animation, 3), (Unknown, 2), ...)
@@ -86,16 +85,13 @@ class FeatureBasedAlgorithm
       }
     }}
 
-
     val featureMoviesMap: Map[String, Seq[String]] =
     featureMovies.map { case(feature, buf) => {
       (feature, buf.toSeq)
     }}
     .toMap
-    //e.g. Map(Michael Apted -> List(730, 619, 729, 621, 620, 1248), 
+    //e.g. Map(Michael Apted -> List(730, 619, 729, 621, 620, 1248), ...    
 
-    //println(featureMoviesMap.toString)  
-    
 
     // one model/classifier for each user in Naive Bayes
     val moviesSet = data.movies.keySet
@@ -154,18 +150,17 @@ class FeatureBasedAlgorithm
             }}
             .sortBy(-_._2)
         }
-        else if(query.mtypes.size > 0){
+        else if(query.mtypes.size > 0){// recommend movies based on features typed in
           
           var movieIds: ListBuffer[String] = new ListBuffer[String]()
           var mids: Seq[String] = Seq[String]()
 
-          //var mids: Seq[String]
-          if(query.display.size == 0 || query.display.head == "Union"){//== "Union"){
+          if(query.display.size == 0 || query.display.head == "Union"){
             var i = 0
             for(i <- 0 until query.mtypes.size){
-              //println("HERE: " + model.featureMoviesMap(query.mtypes(i)))
+              
               try{
-                movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+                movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//union == ++
               }catch{
                 case e: NoSuchElementException => println("Exception on mtype parsing: " + movieIds.toString)
               }
@@ -173,23 +168,24 @@ class FeatureBasedAlgorithm
           }else{// if(query.display.head == "Intersect"){
             var i = 0 
             for(i <- 0 until query.mtypes.size){
-              //println("HERE: " + model.featureMoviesMap(query.mtypes(i)))
+              
               try{
                 if(i==0){
                   movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))
                 }else{
-                  movieIds = movieIds intersect model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+                  movieIds = movieIds intersect model.featureMoviesMap(query.mtypes(i))//union == ++
                 }
               }catch{
                 case e: NoSuchElementException => println("Exception on mtype parsing: " + movieIds.toString)
               }
             }       
           }
+
           mids = movieIds.toSeq
           //TODO: Remove duplicates in itypes for each movie
           //i.e. input John Lasseter output List (1,1) because he is both director and writer of a movie
 
-          if (mids.size > 0) { // rank movies for a user
+          if (mids.size > 0) {
             movies = mids
               .map { mid => {
                   (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))
@@ -197,10 +193,12 @@ class FeatureBasedAlgorithm
             }         
             .sortBy(-_._2)
 
+            // Get top ${top} movies
             if(query.top.size > 0){
               movies = movies.take(query.top.head)
             }
-          }else{
+
+          }else{ // No movie in these categories or error mtypes
             movies = Seq(("No movie found", 0.0))
           }
           

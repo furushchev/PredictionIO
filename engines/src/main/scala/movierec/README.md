@@ -11,6 +11,8 @@ MovieRec engine development
 - randAlgorithm
     + This is for testing and should not be used
 - movieRecAlgorithm
+- featureBasedAlgorithm
+    + Each property is deemed as independent feature of a movie
 
 ## Register engine directly. Useful for testing after engine code change.
 ```
@@ -22,7 +24,7 @@ $ $PIO_HOME/bin/pio train \
   -ap **ONE_OF_THE_ALGO**.json
 $ $PIO_HOME/bin/pio deploy \
   --engine-json src/main/scala/movierec/examples/engine.json \
-  --port 9997
+  --port 8000
 ```
 
 ## Register engine through distribution. Useful for params testing.
@@ -34,46 +36,120 @@ $ $PIO_HOME/bin/pio register
 $ $PIO_HOME/bin/pio train -ap **ONE_OF_THE_ALGO**.json
 ```
 
-## Output statement of pio train
+## Outputs from MovieDataSource
 Movie Example:
 ```
->>Movie: Maverick (1994), ID: 73, ReleaseDate: 01-Jan-1994, Genre: 1000000000000100010
+>>Movie: Men With Guns (1997), ID: 1646, Year: 1998, Genre: 100000010
 
- Directors: Richard Donner, Writers: Roy Huggins,William Goldman, Actors: Mel Gibson,Jodie Foster,James Garner,Graham Greene,Alfred Molina,James Coburn,Dub Taylor,Geoffrey Lewis,Paul L. Smith,Dan Hedaya,Dennis Fimple,Denver Pyle,Clint Black,Max Perlich,Art LaFleur,Leo Gordon,Paul Tuerpe,Jean De Baer,Paul Brinegar,Hal Ketchum,Corey Feldman,John M. Woodward,Jesse Eric Carroll,Toshonnie Touchin,John Meier,Steven Chambers,Doc Duhame,Frank Orsatti,Lauren Shuler Donner,Courtney Barilla,Kimberly Cullum,Gary Richard Frank,Read Morgan,Steve Kahan,Stephen Liska,Robert Jones,J. Mills Goodloe,Vilmos Zsigmond,Waylon Jennings,Kathy Mattea,Carlene Carter,Vince Gill,Janis Oliver Gill,William Smith,Chuck Hart,Doug McClure,Henry Darrow,Michael Paul Chan,Richard Blum,Bert Remsen,Robert Fuller,Donal Gibson,William Marshall,Bill Henderson,Cal Bartlett,Sam Dolan,Linda Hunt,Charles Dierkop,James Drury,John Fogerty,Michael Forte,Patrick Fullerton,Jack Garner,Danny Glover,Will Hutchins,Bob Jennings,Rick Jensen,Margot Kidder,Reba McEntire,John Otrin,Don Stark
+    Directors: WrappedArray(Adrienne Shelly),
+    Writers: WrappedArray(Adrienne Shelly),
+    Actors: WrappedArray(Adrienne Shelly, Tim Guinee, Roger Rees, Louise Lasser, Hynden Walch, Jon Sklaroff, Paul Cassell, Chuck Montgomery, Dave Simonds, Melinda Wade, Pamela Gray, Brian Quirk, C.C. Loveheart, Shirl Bernheim, Elizabeth Newett, Garry Goodrow, Bobby Caravella, Bill Boggs, Elaine Lang, Jan Leslie Harding, Neil Deodhar, Trish Hunter, Kevin Cahoon, Emily Cutler, Kevin Hagan, Joey Golden, Mark Blum, Gordana Rashovich, Hugh Palmer, Harry Bugin, Lynn Clayton)
 
- Runtimes: 127, Countries: USA, Languages: English, Certificates: Argentina:Atp,Australia:PG,Australia:M::(TV rating),Canada:PG::(Manitoba/Nova Scotia/Ontario),Canada:G::(Quebec),Chile:TE,Finland:K-10,Germany:12,Iceland:L,Peru:PT,Portugal:M/12,Singapore:PG,South Korea:12,Spain:T,Sweden:11,UK:PG,USA:PG
+    Runtimes: Australia:80, Countries: WrappedArray(USA), Languages: WrappedArray(English), Certificates: WrappedArray(Australia:M)
 
- Plot: Maverick is recreated from the character James Garner created in the 1950s TV program. Maverick is a gambler who would rather con someone than fight them. He needs an additional three thousand dollars in order to enter a Winner Take All poker game that begins in a few days. He tries to win some, tries to collect a few debts, and recover a little loot for the reward, all with a light hearted air. He joins forces with a woman gambler with a marvelous, though fake, southern accent as the two both try and enter the game.
+    Plot: Donna witnesses identical murders on the same street on different days. Is this a supernatural conspiracy or is she merely cracking up?
+
 ```
 User Example:
 ```
-UserID: 1 Age: 24 Gender: M Occupation: technician zip: 85711
-UserID: 2 Age: 53 Gender: F Occupation: other zip: 94043
-UserID: 3 Age: 23 Gender: M Occupation: writer zip: 32067
+UserID: 1, Age: 24, Gender: M, Occupation: technician, Zip: 85711
+UserID: 2, Age: 53, Gender: F, Occupation: other, Zip: 94043
+UserID: 3, Age: 23, Gender: M, Occupation: writer, Zip: 32067
+UserID: 4, Age: 24, Gender: M, Occupation: technician, Zip: 43537
+UserID: 5, Age: 33, Gender: F, Occupation: other, Zip: 15213
 ```
-
 Rating Example:
 ```
-User: 295 rates Movie: 190 (4.0 / 5)
-User: 224 rates Movie: 69 (4.0 / 5)
-User: 272 rates Movie: 317 (4.0 / 5)
-User: 221 rates Movie: 1010 (3.0 / 5)
+User: 196 rates Movie: 242 (3.0 / 5)
+User: 186 rates Movie: 302 (3.0 / 5)
+User: 22 rates Movie: 377 (1.0 / 5)
+User: 244 rates Movie: 51 (2.0 / 5)
+User: 166 rates Movie: 346 (1.0 / 5)
 ```
-Currently, TrainingData is contructed by Rating, User and Movie.
-PreparedData is the same as TrainingData (not null any more)
 
-TODO parsing Date, deal with String Runtimes and zipcode, use array/list to store actors, directors and writers(?), deal with multiple countries and languages in one movie...
+featureMoviesMap: 
+e.g.
+ Map(Michael Apted -> List(730, 619, 729, 621, 620, 1248), Animation -> List(101, 408, 1078, 538, 404, 1409, 542, 189, 969, 1, 206, 1470, 102, 1091, 820, 625, 169, 420, 989, 1219, 71, 103, 240, 1066, 473, 1076, 426, 95, 993, 1240, 99, 1412, 588, 946, 114, 418, 432, 422, 624, 596, 501, 1367), Monika Harris -> List(1433, 1433, 1432, 1432, 1431, 1431)
 
 
+```
 ## After deploy, you can get predictions
 
 Show engine status:
 ```
-curl -i -X GET http://localhost:9997
+curl -i -X GET http://localhost:8000
 ```
 
 Get predictions
 e.g.
 ```
-curl -i -X POST http://localhost:9997/queries.json -d '{"uid": 12, "mid": 4}'
+// rank movies
+curl -i -X POST http://localhost:8000/queries.json \
+-d '{
+  "uid" : "2",
+  "mids" : ["290", "297", "314", "50", "251", "292"]
+}'
+Output:
+{"movies":[{"297":-8.53295620539528},{"251":-13.326537513274323},{"292":-15.276804370241758},{"290":-32.944167483781335},{"314":-37.45527366828404},{"50":-47.794163974429495}],"isOriginal":false}
+
+// recommend top 5 movies for users
+curl -i -X POST http://localhost:8000/queries.json \
+-d '{
+  "uid" : "2",
+  "top" : [5]
+}'
+Output:
+{"movies":[{"303":-8.53295620539528},{"874":-8.53295620539528},{"297":-8.53295620539528},{"888":-9.202005834376164},{"285":-9.31959978049809}],"isOriginal":false}
+
+// null result
+curl -i -X POST http://localhost:8000/queries.json \
+-d '{
+  "uid" : "2"
+}'
+output: {"movies":null,"isOriginal":false}
+
+
+// recommend all the movies (Union) based on the features typed in
+curl -i -X POST http://localhost:8000/queries.json \
+-d '{
+  "uid" : "5",
+  "mtypes": ["Animation", "John Lasseter"],
+  "display": ["Union"] //Optional, if not specified, it will still print out union of different features
+}'
+
+Output:
+{"movies":[{"596":-25.22082176821925},{"1470":-31.16715550327287},{"169":-34.57836587315185},{"426":-34.946498374209014},{"189":-36.94793412802281},{"71":-37.206118307044534},{"1367":-38.69278926929178},{"240":-40.8839816580837},{"1076":-44.979302198215194},{"114":-47.4544914326997},{"1219":-48.97366095946974},{"408":-49.68555762995061},{"1409":-51.824482553705465},{"946":-59.72603704615436},{"103":-60.668264789323956},{"1066":-62.319521425686546},{"1091":-63.51245266604218},{"1":-64.75716919294615},{"1":-64.75716919294615},{"1":-64.75716919294615},{"625":-65.10688146524663},{"102":-65.20074413707682},{"473":-66.75730966477082},{"624":-70.00620650589387},{"969":-72.4464810016611},{"820":-75.39996354889115},{"101":-75.69777872007603},{"206":-77.73368523381754},{"1240":-79.45270305167615},{"418":-92.61014852823239},{"1412":-93.4718873481002},{"538":-98.90915274240078},{"404":-110.56416821934475},{"422":-119.30433052549398},{"420":-123.80244189523556},{"989":-130.15696375717877},{"99":-131.31755763625134},{"501":-139.08405398833497},{"588":-149.51307929043355},{"95":-165.7046736529991},{"993":-198.10529468779998},{"432":-239.98016084557386},{"1078":-252.6025820317153},{"542":-320.55905302650393}],"isOriginal":false}
+
+
+// recomment movies based on the features typed in (Intersection)
+curl -i -X POST http://localhost:8000/queries.json -d '{
+  "uid":"5",
+  "mtypes": ["Animation", "John Lasseter"],
+  "display": ["Intersect"]
+}'
+Output:
+{"movies":[{"No movie found":0.0}],"isOriginal":false}
+
+
+// recommend movies which have Action and Comedy as genre (Intersection)
+curl -i -X POST http://localhost:8000/queries.json -d '{
+  "uid":"5",
+  "mtypes": ["Action","Comedy"],
+  "display": ["Intersect"]
+}'
+Output:
+{"movies":[{"1181":-18.250184543315196},{"1180":-20.412558789106466},{"80":-26.188618799226443},{"1183":-28.634306517453087},{"456":-30.629163522281583},{"186":-34.325387552579556},{"435":-34.78395130928946},{"388":-35.87453399788616},{"1188":-36.85320664534093},{"232":-37.53408373330906},{"881":-38.65964523262514},{"876":-38.65964523262514},{"1484":-39.01842849159098},{"4":-39.10917422055226},{"201":-39.47735265775776},{"257":-40.44996199467528},{"391":-40.659897621785035},{"399":-41.71981254899977},{"362":-41.734626104657025},{"173":-41.84720544563858},{"73":-41.97540633232025},{"74":-42.29383605758136},{"184":-43.94467336046435},{"231":-44.24300365397366},{"1138":-45.9945360358919},{"17":-47.892601594588385},{"110":-50.90666190377151},{"29":-52.6846187998012},{"21":-57.44445612147449},{"1110":-58.303160538505495},{"385":-60.82982447034621},{"235":-71.44838270561938}],"isOriginal":false} 
+
+// recommend top 10 movies which have Action and Comedy as genre (Intersection)
+curl -i -X POST http://localhost:8000/queries.json -d '{
+  "uid":"5",
+  "mtypes": ["Action","Comedy"],
+  "display": ["Intersect"],
+  "top": [10]
+}'
+
+Output:
+{"movies":[{"1181":-18.250184543315196},{"1180":-20.412558789106466},{"80":-26.188618799226443},{"1183":-28.634306517453087},{"456":-30.629163522281583},{"186":-34.325387552579556},{"435":-34.78395130928946},{"388":-35.87453399788616},{"1188":-36.85320664534093},{"232":-37.53408373330906}],"isOriginal":false}
+
 ```
+

@@ -2,133 +2,127 @@ package io.prediction.engines.movierec
 
 import scala.collection.mutable.ListBuffer
 
-class TrainingData (
-    val ratings: Seq[Rating],
-    val users:   Seq[User],
-    var movies:  Seq[Movie]
-  ) extends Serializable {
-
-  override def toString(): String = {
-    if (ratings.length > 20) {
-      "TrainingData.size=" + ratings.length
-    } else {
-      ratings.toString
-    }
-  }
-}
-
-// TODO: Determine if we need to prepare training data
-// currently it's the same as training data
-class PreparedData (
-    val ratings: Seq[Rating],
-    val users:   Seq[User],
-    var movies:  Seq[Movie]
-  ) extends Serializable {
-
-  override def toString(): String = {
-    if (ratings.length > 20) {
-      "TrainingData.size=" + ratings.length
-    } else {
-      ratings.toString
-    }
-  }
-}
-
 class Rating(
-    val uid:    Int,
-    val mid:    Int,
+    val uindex: Int,
+    val mindex: Int,
     val rating: Float
   ) extends Serializable {
-  override def toString() = "User: " + uid + " rates Movie: " + mid + " (" + rating + " / 5)"
+  override def toString = s"User: ${uindex} rates Movie: ${mindex} (${rating} / 5)"
 }
 
-
-class User(//UserTD
-    val uid: Int,
+class User(
+    val uid: String,
     val age: Int,
     val gender: String,
     val occupation: String,
-    val zip: String //Some zipcode is T8H1N
+    val zip: String
   ) extends Serializable {
-  override def toString() = "UserID: " + uid + ", Age: " + age +
-                            ", Gender: " + gender + ", Occupation: " +
-                            occupation + ", Zip: " + zip
+  override def toString = s"UserID: ${uid}, Age: ${age}, Gender: ${gender}" +
+                          s", Occupation: ${occupation}, Zip: ${zip}"
 }
 
-// movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) |
-//unknown | Action | Adventure | Animation | Children's | Comedy | Crime | Documentary |
-//Drama | Fantasy |Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
-//Thriller | War | Western |
-
- //directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot
-
-class Movie(//ItemTD
-    val mid: Int,
+class Movie(
+    val mid: String,
     val title: String,
-    val releaseDate: String, //TODO Date type
-    val genre: Int,
-    val itypes: Seq[String],
-    val directors: String,// TODO separate directors, writers and actors into list/array...
-    val writers: String,
-    val actors: String,
-    val runtimes: String, // in minutes TODO string for now due to Canada:108
-    val countries: String,
-    val languages: String,
-    val certificates: String,
+    val year: String,
+    val genre: Genre,
+    val directors: Seq[String],
+    val writers: Seq[String],
+    val actors: Seq[String],
+    val runtimes: String,  // TODO: in minutes string for now due to Canada:108
+    val countries: Seq[String],
+    val languages: Seq[String],
+    val certificates: Seq[String],
     val plot: String
   ) extends Serializable {
-  override def toString() = ">>Movie: " + title + ", ID: " + mid +
-                            ", ReleaseDate: " + releaseDate +
-                            ", Genre: " + genre.toBinaryString +
-                            ", Itypes: " + itypes +
-                            "\n\n Directors: " + directors +
-                            ", Writers: " + writers +
-                            ", Actors: " + actors +
-                            "\n\n Runtimes: " + runtimes +
-                            ", Countries: " + countries +
-                            ", Languages: " + languages +
-                            ", Certificates: " + certificates +
-                            "\n\n Plot: " + plot + "\n"
+  override def toString = s"Movie: ${title}, ID: ${mid}, Year: ${year}" +
+                          s", Genre: ${genre}" +
+                          s"\n\n\tDirectors: ${directors}" +
+                          s",\n\tWriters: ${writers}" +
+                          s",\n\tActors: ${actors}" +
+                          s"\n\n\tRuntimes: ${runtimes}" +
+                          s", Countries: ${countries}" +
+                          s", Languages: ${languages}" +
+                          s", Certificates: ${certificates}" +
+                          s"\n\n\tPlot: ${plot}\n"
+}
+
+class TrainingData (
+    val ratings: Seq[Rating],
+    val users:   Map[Int, User],
+    var movies:  Map[Int, Movie]
+  ) extends Serializable {
+
+  override def toString(): String = {
+    if (ratings.length > 20) {
+      s"TrainingData.size=${ratings.length}"
+    } else {
+      ratings.toString
+    }
+  }
+}
+
+// Prepared Movie data for training
+// mtypes contain Movie's features/properties
+class PreparedMovie (
+  val mid: String,
+  val mtypes: Seq[String]
+  ) extends Serializable {
+  override def toString = s"${mid}"
+}
+
+class PreparedData (
+    val ratings: Seq[Rating],
+    val users:   Map[Int, User],
+    var movies:  Map[Int, PreparedMovie]
+  ) extends Serializable {
+
+  override def toString(): String = {
+    if (ratings.length > 20) {
+      s"PreparedData.size=${ratings.length}"
+    } else {
+      ratings.toString
+    }
+  }
 }
 
 object Genre {
 
-  val itypes = Array("Unknown", "Action", "Adventure", "Animation",
+  val genreList = Array("Unknown", "Action", "Adventure", "Animation",
                 "Childrens", "Comedy", "Crime", "Documentary", "Drama",
                 "Fantasy", "FilmNoir", "Horror", "Musical", "Mystery",
                 "Romance", "SciFi", "Thriller", "War", "Western")
 
-  val numGenres = itypes.size
+  val numGenres = genreList.size
 
   // if needed
-  // val gmap = itypes.zipWithIndex.toMap
+  // val gmap = genreList.zipWithIndex.toMap
 }
 
-class Genre(binaryGenreList: Array[String]) {
+class Genre(
+    binaryGenreList: Seq[String]
+  ) extends Serializable {
 
-  val (genreList: List[String], genreInt: Int) = {
+  val (genreList: Seq[String], genreInt: Int) = {
     var gi = 0
     var gl = new ListBuffer[String]()
-    var i = 0
-    for(i <- 0 to Genre.itypes.size-1) {
+    for(i <- 0 until Genre.genreList.size) {
       val bit = binaryGenreList(i).toInt & 1
       if (bit == 1) {
-        gl += Genre.itypes(i)
+        gl += Genre.genreList(i)
       }
       gi |= bit << i
     }
-    (gl.toList, gi)
-  }
-
-  def toBinaryString(): String = {
-    genreInt.toBinaryString
+    (gl.toSeq, gi)
   }
 
   def getGenreInt(): Int = {
     genreInt
   }
 
-  def getGenreList(): List[String] = {
+  def getGenreList(): Seq[String] = {
     genreList
   }
+
+  override def toString = genreInt.toBinaryString
 }

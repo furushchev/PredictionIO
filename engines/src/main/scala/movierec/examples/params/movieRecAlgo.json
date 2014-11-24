@@ -1,0 +1,8 @@
+[
+    {
+        "name": "movierec",
+        "params": {
+            "threshold": 0.2
+        }
+    }
+]

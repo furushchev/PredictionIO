@@ -1,16 +1,10 @@
 package io.prediction.engines.movierec
 
-//import io.prediction.controller.EmptyDataParams
-//import io.prediction.engines.base
-//import io.prediction.engines.base.HasName
-//import org.joda.time.DateTime
 import io.prediction.controller.EmptyParams
 import io.prediction.controller.Params
 import io.prediction.controller.LDataSource
 import scala.io.Source
 import scala.collection.mutable.ListBuffer
-
-
 
 class MovieDataSourceParams(
     /*val appId: Int,
@@ -26,7 +20,6 @@ class MovieDataSourceParams(
     val ratingsFilePath: String,
     val usersFilePath: String,
     val moviesFilePath: String
-  //) extends base.AbstractEventsDataSourceParams
   ) extends Params
 
 case class EvalParams(
@@ -37,7 +30,6 @@ case class EvalParams(
   )
 
 class MovieDataSource(params: MovieDataSourceParams)
-  //extends base.EventsDataSource[DataParams, Query, Actual](params) {
   extends LDataSource[
     MovieDataSourceParams,
     EmptyParams,
@@ -45,106 +37,87 @@ class MovieDataSource(params: MovieDataSourceParams)
     Query,
     Actual] {
 
-  // TODO Maybe We need to trim()?
+  private var logcount: Int  = 0
+  private val DEBUG: Boolean = false
+  private val LOG_MAX: Int = 6
+  def log(str: String) {
+    if (DEBUG & logcount < LOG_MAX) {
+      println(str)
+      logcount += 1
+    }
+  }
+
+  // TODO: Maybe We need to trim()?
   override def read(): Seq[(EmptyParams, TrainingData, Seq[(Query, Actual)])] = {
     val delim = "[\t|]"
-    println("START READING FILES")
+    val subDelim = ","
+    log("START READING FILES")
 
-    //def getCurrentDirectory = new java.io.File( "." ).getCanonicalPath //Used to print curr directory
-    //println(getCurrentDirectory)///home/beth/MovieLens/PredictionIO/engines
-
+    logcount = 0
     val ratings = Source.fromFile(params.ratingsFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            println(new Rating(line(0).toInt, line(1).toInt, line(2).toFloat).toString())
-            new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
+            val r = new Rating(line(0).toInt, line(1).toInt, line(2).toFloat)
+            log(r.toString)
+            r
         }
-    println("DONE RATING FILE")
+    logcount = 0
+    log("DONE RATING FILE")
 
     val users = Source.fromFile(params.usersFilePath).getLines()
         .toList.map { it =>
             val line = it.split(delim)
-            println(new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4)).toString())
-            new User(line(0).toInt, line(1).toInt, line(2), line(3), line(4))
-        }
-    println("DONE USERS FILE")
+            val u = new User(line(0), line(1).toInt, line(2), line(3), line(4))
+            log(u.toString)
+            (line(0).toInt, u)
+        }.toMap
+    logcount = 0
+    log("DONE USERS FILE")
 
-    // movie id | movie title | release date | video release date (TODO) | IMDb URL (TODO) |
-    //unknown 5 | Action | Adventure | Animation | Children's | Comedy | Crime | Documentary |
-    //Drama | Fantasy |Film-Noir | Horror | Musical | Mystery | Romance | Sci-Fi |
-    //Thriller | War | Western |
 
-    val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()//To avoid java.nio.charset.MalformedInputException
+    // MOVIE DATA SOURCE FORMAT:
+    // movie id | movie title | release date | video release date (TODO)
+    // | IMDb URL (TODO) | genre's binary list | directors | writers | actors
+    // | runtimes (minutes) | countries | languages | certificates | plot
+
+    // To avoid java.nio.charset.MalformedInputException
+    val movies = Source.fromFile(params.moviesFilePath, "iso-8859-1").getLines()
         .toList.map { it =>
-            val line = it.split(delim)// TODO Genre parsing and Data parsing
-            var i = 5 + Genre.numGenres
+            val line = it.split(delim)
 
-            val genre = new Genre(line.slice(5, i))
-            val seq_itypes = genre.getGenreList.toSeq
-            val genreInt = genre.getGenreInt
+            // starting position of other attributes after genre's binary list
+            var pos = 5 + Genre.numGenres
 
-            //println("end of genre")
-            //5+i directors | writers | actors | runtimes (in minutes) | countries | languages | certificates | plot
-            if(i+7 < line.size){
+            val genre = new Genre(line.slice(5, pos))
 
-              println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
-                        line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7)).toString())
-              new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i+1),
-                        line(i+2), line(i+3), line(i+4), line(i+5), line(i+6), line(i+7))
-            }else{
-              // Current data is not done (missing data), so in order to compile and run
-              i=2
-              println(new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
-                      line(i), line(i), line(i), line(i), line(i), line(i)).toString())
-            new Movie(line(0).toInt, line(1), line(2), genreInt, seq_itypes, line(i), line(i),
-                      line(i), line(i), line(i), line(i), line(i), line(i))
-
+            var movie: Movie = null
+            try {
+              movie = new Movie(
+                    line(0), line(1), line(2).split("-")(2), genre,
+                    line(pos).split(subDelim), line(pos+1).split(subDelim),
+                    line(pos+2).split(subDelim), line(pos+3),
+                    line(pos+4).split(subDelim), line(pos+5).split(subDelim),
+                    line(pos+6).split(subDelim), line(pos+7))
             }
-        }
-    println("DONE MOVIES FILE. FINISHED ALL")
+            catch {
+              // some movies might have missing fields
+              case e: Exception =>
+                println("DATA PARSING ERROR or Exception Caught: " + e)
 
+                movie = new Movie(line(0), line(1), line(2), genre,
+                              Seq(), Seq(), Seq(), null, Seq(), Seq(), Seq(), null)
+            }
 
-    val data = new TrainingData(ratings, users, movies);
-    return Seq((null.asInstanceOf[EmptyParams], data, Seq[(Query, Actual)]()))
+            log(movie.toString)
+
+            (line(0).toInt, movie)
+        }.toMap
+
+    logcount = 0
+    log("DONE MOVIES FILE. FINISHED ALL")
+
+    Seq((null.asInstanceOf[EmptyParams],
+         new TrainingData(ratings, users, movies),
+         Seq[(Query, Actual)]()))
   }
-
-  /*override def generateQueryActualSeq(
-    users: Map[Int, base.UserTD],
-    items: Map[Int, base.ItemTD],
-    actions: Seq[base.U2IActionTD],
-    trainUntil: DateTime,
-    evalStart: DateTime,
-    evalUntil: DateTime): (DataParams, Seq[(Query, Actual)]) = {
-
-    require(
-      !params.evalParams.isEmpty,
-      "EventsDataSourceParams.evalParams must not be empty")
-
-    val evalParams = params.evalParams.get
-
-    val ui2uid: Map[Int, String] = users.mapValues(_.uid)
-    val ii2iid: Map[Int, String] = items.mapValues(_.iid)
-
-    val userActions: Map[Int, Seq[base.U2IActionTD]] =
-      actions.groupBy(_.uindex)
-
-    val allIids: Vector[String]  = actions.map(_.iindex)
-      .map(ii => ii2iid(ii))
-      .distinct
-      .sortBy(identity)
-      .toVector
-
-    val qaSeq: Seq[(Query, Actual)] = userActions.map { case (ui, actions) => {
-      val uid = ui2uid(ui)
-      val iids = actions.map(u2i => ii2iid(u2i.iindex))
-      val actionTuples = iids.zip(actions).map(e => (uid, e._1, e._2))
-      val n = (if (evalParams.queryN == -1) iids.size else evalParams.queryN)
-      val query = Query(uid = uid, n = n)
-      val actual = Actual(actionTuples = actionTuples, servedIids = allIids)
-      (query, actual)
-    }}
-    .toSeq
-
-    (new DataParams(trainUntil, evalStart, evalUntil), qaSeq)
-  }*/
 }

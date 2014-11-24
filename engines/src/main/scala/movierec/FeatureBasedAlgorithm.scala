@@ -163,19 +163,21 @@ class FeatureBasedAlgorithm
           if(query.display.size == 0 || query.display.head == "Union"){//== "Union"){
             var i = 0
             for(i <- 0 until query.mtypes.size){
-              println("MIMI: " + model.featureMoviesMap(query.mtypes(i)))
+              //println("HERE: " + model.featureMoviesMap(query.mtypes(i)))
               movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
             }
-            mids = movieIds.toSeq
-          }else{
-            /*var i = 0
+          }else{// if(query.display.head == "Intersect"){
+            var i = 0
             for(i <- 0 until query.mtypes.size){
-              println("MIMI: " + model.featureMoviesMap(query.mtypes(i)))
-              movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
-            }
-            mids = movieIds.toSeq*/
+              println("HERE: " + model.featureMoviesMap(query.mtypes(i)))
+              if(i==0){
+                movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))
+              }else{
+                movieIds = movieIds intersect model.featureMoviesMap(query.mtypes(i))//.to[ListBuffer] //union == ++
+              }
+            }       
           }
-
+          mids = movieIds.toSeq
           //TODO: Remove duplicates in itypes for each movie
           //i.e. input John Lasseter output List (1,1) because he is both director and writer of a movie
 
@@ -186,6 +188,8 @@ class FeatureBasedAlgorithm
               }
             }         
             .sortBy(-_._2)
+          }else{
+            movies = Seq(("No movie found", 0.0))
           }
           
         }

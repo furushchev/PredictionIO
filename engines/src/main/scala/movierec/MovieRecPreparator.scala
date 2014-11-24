@@ -16,6 +16,7 @@ class MovieRecPreparator()
                 movie.directors, movie.writers,
                 //movie.actors, movie.countries,
                 movie.languages).flatten
+        //TODO: eliminate duplicates in mtypes for each movie
 
         // println(movie.mid + " " + mtypes.toString)
 

@@ -196,6 +196,10 @@ class FeatureBasedAlgorithm
               }
             }         
             .sortBy(-_._2)
+
+            if(query.top.size > 0){
+              movies = movies.take(query.top.head)
+            }
           }else{
             movies = Seq(("No movie found", 0.0))
           }

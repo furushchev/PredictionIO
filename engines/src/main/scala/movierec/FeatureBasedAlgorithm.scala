@@ -182,9 +182,7 @@ class FeatureBasedAlgorithm
           }
 
           mids = movieIds.toSeq
-          //TODO: Remove duplicates in itypes for each movie
-          //i.e. input John Lasseter output List (1,1) because he is both director and writer of a movie
-
+ 
           if (mids.size > 0) {
             movies = mids
               .map { mid => {

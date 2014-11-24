@@ -11,14 +11,15 @@ class MovieRecPreparator()
 
     val preparedMovies: Map[Int, PreparedMovie] = td.movies
       .map{ case(mid, movie) =>
-        val mtypes: Seq[String] =
+        var mtypes: Seq[String] =
             Seq(Seq(movie.year), movie.genre.getGenreList,
                 movie.directors, movie.writers,
                 //movie.actors, movie.countries,
                 movie.languages).flatten
-        //TODO: eliminate duplicates in mtypes for each movie
+        //TODO: we call prepare 5 times currectly, can we eliminate times?
+        mtypes = mtypes.distinct
 
-        // println(movie.mid + " " + mtypes.toString)
+         println(movie.mid + " " + mtypes.toString)
 
         (mid, new PreparedMovie(movie.mid, mtypes))
       }

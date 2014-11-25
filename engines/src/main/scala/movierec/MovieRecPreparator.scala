@@ -19,7 +19,7 @@ class MovieRecPreparator()
         //TODO: we call prepare 5 times currectly, can we eliminate times?
         mtypes = mtypes.distinct
 
-         println(movie.mid + " " + mtypes.toString)
+        //println(movie.mid + " " + mtypes.toString)
 
         (mid, new PreparedMovie(movie.mid, mtypes))
       }

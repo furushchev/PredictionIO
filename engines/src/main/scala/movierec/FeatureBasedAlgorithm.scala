@@ -73,11 +73,11 @@ class FeatureBasedAlgorithm
     val featureMovies: HashMap[String, ListBuffer[String]] = HashMap[String, ListBuffer[String]]()
 
     data.movies.map { case(mindex, movie) => {
-      for(mtype <- movie.mtypes){
-        if(featureMovies.contains(mtype)){
+      for (mtype <- movie.mtypes) {
+        if (featureMovies.contains(mtype)) {
           val buf: ListBuffer[String] = featureMovies(mtype)
           buf += movie.mid
-        }else{
+        } else {
           val buf = new ListBuffer[String]()
           buf += movie.mid
           featureMovies.put(mtype, buf)
@@ -98,6 +98,11 @@ class FeatureBasedAlgorithm
     // Map from uid to mid that user bought
     val conversionsMap: Map[Int, Set[Int]] = data.ratings.groupBy(_.uindex)
       .mapValues(_.map(_.mindex).toSet)
+
+    //println("CONVERSION: " + conversionsMap)
+    //val rM: Map[Int, Set[Int]] = data.ratings.groupBy(_.mindex)
+    //  .mapValues(_.map(_.uindex).toSet)
+    //println("REVERse: " + rM)
 
     // mindex to feature counter map
     val movieFeaturesMap: Map[String, Counter[String, Double]] =
@@ -149,33 +154,32 @@ class FeatureBasedAlgorithm
               }
             }}
             .sortBy(-_._2)
-        }
-        else if(query.mtypes.size > 0){// recommend movies based on features typed in
+        } else if (query.mtypes.size > 0){// recommend movies based on features typed in
           
           var movieIds: ListBuffer[String] = new ListBuffer[String]()
           var mids: Seq[String] = Seq[String]()
 
-          if(query.display.size == 0 || query.display.head == "Union"){
+          if (query.display.size == 0 || query.display.head == "Union") {
             var i = 0
-            for(i <- 0 until query.mtypes.size){
+            for (i <- 0 until query.mtypes.size) {
               
-              try{
+              try {
                 movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))//union == ++
-              }catch{
+              } catch {
                 case e: NoSuchElementException => println("Exception on mtype parsing: " + movieIds.toString)
               }
             }
-          }else{// if(query.display.head == "Intersect"){
+          } else {// if(query.display.head == "Intersect"){
             var i = 0 
-            for(i <- 0 until query.mtypes.size){
+            for (i <- 0 until query.mtypes.size) {
               
-              try{
-                if(i==0){
+              try {
+                if (i == 0) {
                   movieIds = movieIds union model.featureMoviesMap(query.mtypes(i))
-                }else{
+                } else {
                   movieIds = movieIds intersect model.featureMoviesMap(query.mtypes(i))//union == ++
                 }
-              }catch{
+              } catch {
                 case e: NoSuchElementException => println("Exception on mtype parsing: " + movieIds.toString)
               }
             }       
@@ -192,16 +196,15 @@ class FeatureBasedAlgorithm
             .sortBy(-_._2)
 
             // Get top ${top} movies
-            if(query.top.size > 0){
+            if (query.top.size > 0) {
               movies = movies.take(query.top.head)
             }
 
-          }else{ // No movie in these categories or error mtypes
+          } else { // No movie in these categories or error mtypes
             movies = Seq(("No movie found", 0.0))
           }
           
-        }
-        else if (query.top.size > 0) { // get top ${top} movies
+        } else if (query.top.size > 0) { // get top ${top} movies
           movies =
             (for { mid <- model.movieFeaturesMap.keySet }
               yield (mid, model.userClassifierMap(query.uid).scores(model.movieFeaturesMap(mid))(true))

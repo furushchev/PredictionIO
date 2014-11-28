@@ -88,7 +88,7 @@ class MovieDataSource(params: MovieDataSourceParams)
             // starting position of other attributes after genre's binary list
             var pos = 5 + Genre.numGenres
 
-            val genre = new Genre(line.slice(5, pos))
+            val genre = Genre(line.slice(5, pos))
 
             var movie: Movie = null
             try {

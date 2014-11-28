@@ -88,7 +88,7 @@ class PreparedData (
 
 object Genre {
 
-  val genreList = Array("Unknown", "Action", "Adventure", "Animation",
+  val genreList = Seq("Unknown", "Action", "Adventure", "Animation",
                 "Childrens", "Comedy", "Crime", "Documentary", "Drama",
                 "Fantasy", "FilmNoir", "Horror", "Musical", "Mystery",
                 "Romance", "SciFi", "Thriller", "War", "Western")
@@ -97,32 +97,25 @@ object Genre {
 
   // if needed
   // val gmap = genreList.zipWithIndex.toMap
-}
 
-class Genre(
-    binaryGenreList: Seq[String]
-  ) extends Serializable {
-
-  val (genreList: Seq[String], genreInt: Int) = {
+  // Genre factory method
+  def apply(binaryGenreList: Seq[String]):Genre = {
     var gi = 0
     var gl = new ListBuffer[String]()
-    for(i <- 0 until Genre.genreList.size) {
+    for(i <- 0 until numGenres) {
       val bit = binaryGenreList(i).toInt & 1
       if (bit == 1) {
-        gl += Genre.genreList(i)
+        gl += genreList(i)
       }
       gi |= bit << i
     }
-    (gl.toSeq, gi)
+    new Genre(gl, gi)
   }
+}
 
-  def getGenreInt(): Int = {
-    genreInt
-  }
-
-  def getGenreList(): Seq[String] = {
-    genreList
-  }
-
+class Genre(
+    val genreList: Seq[String],
+    val genreInt: Int
+  ) extends Serializable {
   override def toString = genreInt.toBinaryString
 }

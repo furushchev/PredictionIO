@@ -154,7 +154,7 @@ class FeatureBasedAlgorithm
               }
             }}
             .sortBy(-_._2)
-        } else if (query.mtypes.size > 0){// recommend movies based on features typed in
+        } else if (query.mtypes.size > 0) {// recommend movies based on features typed in
           
           var movieIds: ListBuffer[String] = new ListBuffer[String]()
           var mids: Seq[String] = Seq[String]()

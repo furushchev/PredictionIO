@@ -33,7 +33,8 @@ class Movie(
     val countries: Seq[String],
     val languages: Seq[String],
     val certificates: Seq[String],
-    val plot: String
+    val plot: String,
+    val tags: Seq[String]
   ) extends Serializable {
   override def toString = s"Movie: ${title}, ID: ${mid}, Year: ${year}" +
                           s", Genre: ${genre}" +
@@ -44,7 +45,8 @@ class Movie(
                           s", Countries: ${countries}" +
                           s", Languages: ${languages}" +
                           s", Certificates: ${certificates}" +
-                          s"\n\n\tPlot: ${plot}\n"
+                          s"\n\n\tPlot: ${plot}" +
+                          s",\n\n\tTags: ${tags}\n"
 }
 
 class TrainingData (

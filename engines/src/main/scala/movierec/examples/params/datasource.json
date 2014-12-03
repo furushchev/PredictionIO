@@ -1,5 +1,5 @@
 {
     "ratingsFilePath": "./src/main/scala/movierec/data/u.data",
     "usersFilePath": "./src/main/scala/movierec/data/u.user",
-    "moviesFilePath": "./src/main/scala/movierec/data/u.item.extended"
+    "moviesFilePath": "./src/main/scala/movierec/data/u.item.tags"
 }

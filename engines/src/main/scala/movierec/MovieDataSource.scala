@@ -94,10 +94,11 @@ class MovieDataSource(params: MovieDataSourceParams)
             try {
               movie = new Movie(
                     line(0), line(1), line(2).split("-")(2), genre,
-                    line(pos).split(subDelim), line(pos+1).split(subDelim),
-                    line(pos+2).split(subDelim), line(pos+3),
-                    line(pos+4).split(subDelim), line(pos+5).split(subDelim),
-                    line(pos+6).split(subDelim), line(pos+7))
+                    line(pos).split(subDelim), line(pos + 1).split(subDelim),
+                    line(pos + 2).split(subDelim), line(pos + 3),
+                    line(pos + 4).split(subDelim), line(pos + 5).split(subDelim),
+                    line(pos + 6).split(subDelim), line(pos + 7), 
+                    line(pos + 8).split(subDelim))
             }
             catch {
               // some movies might have missing fields
@@ -105,7 +106,7 @@ class MovieDataSource(params: MovieDataSourceParams)
                 println("DATA PARSING ERROR or Exception Caught: " + e)
 
                 movie = new Movie(line(0), line(1), line(2), genre,
-                              Seq(), Seq(), Seq(), null, Seq(), Seq(), Seq(), null)
+                              Seq(), Seq(), Seq(), null, Seq(), Seq(), Seq(), null, Seq())
             }
 
             log(movie.toString)

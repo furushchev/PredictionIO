@@ -18,9 +18,10 @@ class MovieRecPreparator()
         mtypes ++= movie.genre.genreList
         mtypes ++= movie.directors
         mtypes ++= movie.writers
-        mtypes ++= movie.actors
+        //mtypes ++= movie.actors
         mtypes ++= movie.countries
         mtypes ++= movie.languages
+        mtypes ++= movie.tags
         mtypes = mtypes.distinct
 
         //TODO: we call prepare 5 times currectly, can we eliminate times?

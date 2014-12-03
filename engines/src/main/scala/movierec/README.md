@@ -39,15 +39,18 @@ $ $PIO_HOME/bin/pio train -ap **ONE_OF_THE_ALGO**.json
 ## Outputs from MovieDataSource
 Movie Example:
 ```
->>Movie: Men With Guns (1997), ID: 1646, Year: 1998, Genre: 100000010
+Movie: Toy Story (1995), ID: 1, Year: 1995, Genre: 111000
 
-    Directors: WrappedArray(Adrienne Shelly),
-    Writers: WrappedArray(Adrienne Shelly),
-    Actors: WrappedArray(Adrienne Shelly, Tim Guinee, Roger Rees, Louise Lasser, Hynden Walch, Jon Sklaroff, Paul Cassell, Chuck Montgomery, Dave Simonds, Melinda Wade, Pamela Gray, Brian Quirk, C.C. Loveheart, Shirl Bernheim, Elizabeth Newett, Garry Goodrow, Bobby Caravella, Bill Boggs, Elaine Lang, Jan Leslie Harding, Neil Deodhar, Trish Hunter, Kevin Cahoon, Emily Cutler, Kevin Hagan, Joey Golden, Mark Blum, Gordana Rashovich, Hugh Palmer, Harry Bugin, Lynn Clayton)
+  Directors: WrappedArray(John Lasseter),
+  Writers: WrappedArray(John Lasseter, Pete Docter, Andrew Stanton, Joe Ranft, Joss Whedon, Andrew Stanton, Joel Cohen, Alec Sokolow),
+  Actors: WrappedArray(Tom Hanks, Tim Allen, Don Rickles, Jim Varney, Wallace Shawn, John Ratzenberger, Annie Potts, John Morris, Erik von Detten, Laurie Metcalf, R. Lee Ermey, Sarah Freeman, Penn Jillette, Jack Angel, Spencer Aste, Greg Berg, Lisa Bradley, Kendall Cunningham, Debi Derryberry, Cody Dorkin, Bill Farmer, Craig Good, Gregory Grudt, Danielle Judovits, Sam Lasseter, Brittany Levenbrown, Sherry Lynn, Scott McAfee, Mickie McGowan, Ryan O'Donohue, Jeff Pidgeon, Patrick Pinney, Phil Proctor, Jan Rabson, Joe Ranft, Andrew Stanton, Shane Sweet)
 
-    Runtimes: Australia:80, Countries: WrappedArray(USA), Languages: WrappedArray(English), Certificates: WrappedArray(Australia:M)
+  Runtimes: 81, Countries: WrappedArray(USA), Languages: WrappedArray(English), Certificates: WrappedArray(Argentina:Atp, Australia:G, Belgium:KT, Brazil:Livre, Canada:G::(Manitoba/Nova Scotia/Quebec), Canada:F::(Ontario), Chile:TE, Denmark:7, Finland:S, France:U, Germany:o.Al.::(w), Greece:K, Hong Kong:I, Iceland:L, Ireland:G, Malaysia:U, Mexico:AA, Netherlands:AL, New Zealand:G, Norway:7, Peru:PT, Portugal:M/6, Singapore:G, South Korea:All, Spain:T, Sweden:7, UK:PG, USA:G, USA:TV-G::(TV rating))
 
-    Plot: Donna witnesses identical murders on the same street on different days. Is this a supernatural conspiracy or is she merely cracking up?
+  Plot: A little boy named Andy loves to be in his room, playing with his toys, especially his doll named "Woody". But, what do the toys do when Andy is not with them, they come to life. Woody believes that he has life (as a toy) good. However, he must worry about Andy's family moving, and what Woody does not know is about Andy's birthday party. Woody does not realize that Andy's mother gave him an action figure known as Buzz Lightyear, who does not believe that he is a toy, and quickly becomes Andy's new favorite toy. Woody, who is now consumed with jealousy, tries to get rid of Buzz. Then, both Woody and Buzz are now lost. They must find a way to get back to Andy before he moves without them, but they will have to pass through a ruthless toy killer, Sid Phillips.,
+
+  Tags: WrappedArray(adventure, animated, animation, cartoon, cgi, childhood, children, classic, clever, computer animation, cute, disney, disney animated feature, entertaining, friendship, fun, fun movie, good, great, great movie, heartwarming, imdb top 250, kids, kids and family, light, original, original plot, oscar (best animated feature), pixar, pixar animation, story, toys, unlikely friendships, witty)
+
 
 ```
 User Example:
@@ -150,5 +153,17 @@ curl -i -X POST http://localhost:8000/queries.json -d '{
 
 Output:
 {"movies":[{"1181":-18.250184543315196},{"1180":-20.412558789106466},{"80":-26.188618799226443},{"1183":-28.634306517453087},{"456":-30.629163522281583},{"186":-34.325387552579556},{"435":-34.78395130928946},{"388":-35.87453399788616},{"1188":-36.85320664534093},{"232":-37.53408373330906}],"isOriginal":false}
+
+
+// recommend top 10 movies which has witty as tag
+curl -i -X POST http://localhost:8000/queries.json -d '{
+ "uid":"5",
+ "mtypes":["witty"],
+"top":[10]
+}'
+
+Output:
+{"movies":[{"718":-92.89030349488802},{"83":-102.27807592150992},{"695":-131.2582669336731},{"213":-145.00798088267655},{"114":-164.6381517952579},{"485":-169.54258309028188},{"1172":-170.9910538906233},{"486":-178.47064752657508},{"792":-179.18659922920878},{"497":-188.23683165316163}],"isOriginal":false}
+
 ```
 

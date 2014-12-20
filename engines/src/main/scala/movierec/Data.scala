@@ -24,7 +24,8 @@ case class Actual(
     // (uid, mid, action) - tuple
     //val actionTuples: Seq[(String, String, base.U2IActionTD)],
     //val servedIids: Vector[String]
-    val ratings: Seq[Rating]
+    val ratings: Seq[Rating],
+    val servedMids: Vector[String]
   ) extends Serializable {
   override def toString = s"${ratings}"
 }

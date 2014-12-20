@@ -12,7 +12,7 @@ import io.prediction.engines.base.HasName
 class MovieRecMetrics (
   val name: String = "",
   val buckets: Int = 10,
-  val ratingParams: BinaryRatingParams,
+  val ratingParams: BinaryRatingParams, //only need goodThreshold though
   val measureType: MeasureType.Type = MeasureType.PrecisionAtK,
   val measureK: Int = -1
 ) extends Params {}
@@ -91,25 +91,27 @@ class MovieRecMetrics(params: MovieRecMetricsParams)
   : MetricsUnit = {
     val score = measure.calculate(query, prediction, actual)
 
+    // Compute the hash of a string
     val uidHash: Int = MurmurHash3.stringHash(query.uid)
 
-    // Create a baseline by randomly picking query.n items from served items.
+////////////////////////////////TODO
+    // Create a baseline by randomly picking query.n(query.mids.size) items from served items.
     
     val rand = new Random(seed = uidHash)
     //val iidSet = HashSet[String]()
 
-    val servedIids = actual.servedIids
+    val servedMids = actual.servedMids
 
     //val n = math.min(query.n, servedIids.size)
 
     val randMids = rand.shuffle(
-      (if (query.n > servedIids.size) {
+      (if (query.n > servedMids.size) {
           // If too few items where served, use only the served items
-          servedIids.toSet
+          servedMids.toSet
         } else {
           val tempSet = MHashSet[String]()
           while (tempSet.size < query.n) {
-            tempSet.add(servedIids(rand.nextInt(query.n)))
+            tempSet.add(servedMids(rand.nextInt(query.mids.size)))
           }
           tempSet.toSet
         }
@@ -120,10 +122,10 @@ class MovieRecMetrics(params: MovieRecMetricsParams)
 
     println(randMids.mkString("Randmid: [", ", ", "]"))
 
-    // TODO(yipjustin): Implement baseline
+    // TODO Implement baseline
     val baseline = measure.calculate(
       query,
-      Prediction(randIids.map(mid => (mid, 0.0))),
+      Prediction(randMids.map(mid => (mid, 0.0)), false),
       actual)
 
     new MetricsUnit(
@@ -136,7 +138,7 @@ class MovieRecMetrics(params: MovieRecMetricsParams)
     )
   }
   
-
+////////////////////////code from ItemRec
 
   override def computeSet(dataParams: HasName,
     metricUnits: Seq[MetricsUnit]): Seq[MetricsUnit] = metricUnits

@@ -6,8 +6,31 @@ import io.prediction.engines.base.MetricsHelper
 import io.prediction.engines.base.MetricsOutput
 import io.prediction.controller.Metrics
 import io.prediction.controller.Params
-
+import io.prediction.controller.EmptyParams
 import io.prediction.engines.base.HasName
+
+
+import com.github.nscala_time.time.Imports._
+import scala.math.BigDecimal
+import breeze.stats.{ mean, meanAndVariance }
+
+import org.json4s._
+import org.json4s.JsonDSL._
+import org.json4s.native.JsonMethods._
+import org.json4s.native.Serialization.{read, write}
+import org.json4s.native.Serialization
+
+import java.io.FileOutputStream
+import java.io.ObjectOutputStream
+import java.io.FileInputStream
+import java.io.ObjectInputStream
+
+import scala.io.Source
+import java.io.PrintWriter
+import java.io.File
+
+import io.prediction.engines.util.{ MetricsVisualization => MV }
+
 import scala.util.hashing.MurmurHash3
 import scala.collection.immutable.NumericRange
 import scala.collection.immutable.Range
@@ -183,11 +206,25 @@ class MovieRecMetrics(params: MovieRecMetricsParams)
     }
     .sortBy(_._1)
     
+
     val aggregateByActualGoodSize = aggregateMU(
       allUnits,
       mu => MetricsHelper.groupByRange(
         Array(0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144), "%.0f")(
-          base.MetricsHelper.actions2GoodIids(mu.a.actionTuples, params.ratingParams).size))
+          mu.a.ratings.filter {
+            r => {
+              r.rating >= params.ratingParams.goodThreshold 
+            }
+          }
+          .map(_.mindex)
+          .toSet
+          .size))
+
+
+      //MetricsHelper.actions2GoodIids(
+      //actual.actionTuples, ratingParams)
+
+
 
     val outputData = MetricsOutput (
       name = params.name,

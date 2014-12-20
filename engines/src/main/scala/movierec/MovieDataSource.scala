@@ -64,53 +64,48 @@ class MovieDataSource(params: MovieDataSourceParams)
     log("DONE MOVIES FILE; here are the first 5 entries: ")
     log(movies.take(4))
 
-/*    if (params.actualRatio.isEmpty) {
+    if (params.actualRatio.isEmpty) {
+      Seq((null.asInstanceOf[EmptyParams],
+          new TrainingData(ratings, users, movies),
+          Seq[(Query, Actual)]()))
+    } else { // TODO: for evaluation, not tested
+      val testingRatio = params.actualRatio.get
+      // size for Actual data
+      val rsize = (ratings.size * testingRatio).toInt
+      val usize = (users.size * testingRatio).toInt
+      val msize = (movies.size * testingRatio).toInt
+      // split data using take and drop
+      Seq((null.asInstanceOf[EmptyParams],
+          new TrainingData(ratings.drop(rsize), users.drop(usize), movies.drop(msize)),
+          generateQueryActualSeq(users.take(usize), movies.take(usize), ratings.take(msize))))
+    }
 
-    } else {
-
-    }*/
-    Seq((null.asInstanceOf[EmptyParams],
-         new TrainingData(ratings, users, movies),
-         Seq[(Query, Actual)]()))
   }
 
     /** Return a list of Query-Actual pair for evaluation.
     *
-    * It constructs a list of Query-Actual pair using the list of actions.
-    * For each user in the list, it creates a Query instance using all items in
-    * actions, and creates an Actual instance with all actions associated with
+    * It constructs a list of Query-Actual pair using the list of ratings.
+    * For each user in the list, it creates a Query instance using all movies in
+    * ratings, and creates an Actual instance with all ratings associated with
     * the user. Note that it is the metrics job to decide how to interprete the
     * semantics of the actions.
     */
-   /*
   def generateQueryActualSeq(
     users:  Map[Int, User],
     movies: Map[Int, Movie],
     ratings: Seq[Rating]): Seq[(Query, Actual)] = {
 
-    val ui2uid: Map[Int, String] = users.mapValues(_.uid)
-    val ii2iid: Map[Int, String] = items.mapValues(_.iid)
+    users.map{ user => {
+      val uindex = user.uid.toInt
+      val mids = ratings.map(rating => if (rating.uindex == uindex) mindex.toString)
+      val uRatings = ratings.filter(_.uindex == uindex)
 
-    val allIids = actions.map(_.iindex)
-      .map(ii => ii2iid(ii))
-      .distinct
-      .sortBy(identity)
-
-    val userActions: Map[Int, Seq[U2IActionTD]] =
-      actions.groupBy(_.uindex)
-
-    userActions.map { case (ui, actions) => {
-      val uid = ui2uid(ui)
-      val iids = actions.map(u2i => ii2iid(u2i.iindex))
-      val actionTuples = iids.zip(actions).map(e => (uid, e._1, e._2))
-
-      val query = Query(uid = uid, iids = allIids)
-      val actual = Actual(actionTuples = actionTuples)
+      val query = Query(uid = user.uid, mids = mids)
+      val actual = Actual(ratings = uRatings)
       (query, actual)
-    }}
-    .toSeq
+      }}
+      .toSeq
   }
-  */
 
   def extractRatingsFromFile (file:String, delim:String)
   : Seq[Rating] = {

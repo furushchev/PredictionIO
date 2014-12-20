@@ -1,8 +1,21 @@
 package io.prediction.engines.movierec
 
-class MovieRecMetrics (
+import io.prediction.engines.base
+import io.prediction.engines.base.BinaryRatingParams
+import io.prediction.engines.base.MetricsHelper
+import io.prediction.engines.base.MetricsOutput
+import io.prediction.controller.Metrics
+import io.prediction.controller.Params
+import io.prediction.engines.base.HasName
 
-  ) extends Params {}
+
+class MovieRecMetrics (
+  val name: String = "",
+  val buckets: Int = 10,
+  val ratingParams: BinaryRatingParams,
+  val measureType: MeasureType.Type = MeasureType.PrecisionAtK,
+  val measureK: Int = -1
+) extends Params {}
 
 object MeasureType extends Enumeration {
   type = Value
@@ -28,19 +41,31 @@ class MovieRecPrecision(val k: Int, val ratingParams: BinaryRatingParams)
   
   def calculate(query: Query, prediction: Prediction, actual: Actual)
   : Double = {
-    val kk = (if (k == -1) query.n else k)
+    val kk = (if (k == -1) query.mids.size else k)
 
-    // Returns a set of string
-    val actualItems = MetricsHelper.actions2GoodIids(
-      actual.actionTuples, ratingParams)
+    // Returns a set of string which is mid of the rating (actionTuple's second string)
+    val actualItems = 
+        actual.ratings
+          .filter{
+            r => {
+              r.rating >= binaryRatingParams.goodThreshold
+            }
+          }
+          .map(_.mIndex)
+          .toSet
+      //MetricsHelper.actions2GoodIids(
+      //actual.actionTuples, ratingParams)
 
+    // See how many good movies(mid) exist in actual are in prediction (in first kk movies)
     val relevantCount = prediction.movies.take(kk)
       .map(_._1)
       .filter(mid => actualItems(mid))
       .size
 
+    // The min value of the three values in the seq
     val denominator = Seq(kk, prediction.movies.size, actualItems.size).min
 
+    // Score
     relevantCount.toDouble / denominator
   }
 }

@@ -1,4 +1,4 @@
-/*
+
 package io.prediction.engines.movierec
 
 import io.prediction.controller.EmptyParams
@@ -18,19 +18,22 @@ object Runner {
 
     // Define params
     // ---------------------------------------------------------------
-    val dsp = DataSourceParams(
-      ratingsFilePath = "",
-      usersFilePath = "",
-      moviesFilePath = ""
+    val dsp = new MovieDataSourceParams(
+      ratingsFilePath = "./src/main/scala/movierec/data/u.data",
+      usersFilePath = "./src/main/scala/movierec/data/u.user",
+      moviesFilePath = "./src/main/scala/movierec/data/u.item.tags"
     )
-
-    val mp = new EmptyParams()
 
     val pp = new EmptyParams()
 
+    /*val mp = new EmptyParams()
+
     val mrp = new MovieRecAlgorithmParams(
       threshold = Double.MinPositiveValue
-    )
+    )*/
+
+    val fbp = new EmptyParams()
+
 
     val sp = new EmptyParams()
 
@@ -38,7 +41,7 @@ object Runner {
       dataSourceParams = dsp,
       preparatorParams = pp,
       algorithmParamsList = Seq(
-        ("MovieRecAlgorithm", mrp)),
+        ("featurebased", fbp)),
       servingParams = sp
     )
 
@@ -57,4 +60,3 @@ object Runner {
     )
   }
 }
-*/

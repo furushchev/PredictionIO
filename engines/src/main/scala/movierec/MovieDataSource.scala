@@ -95,6 +95,10 @@ class MovieDataSource(params: MovieDataSourceParams)
     movies: Map[Int, Movie],
     ratings: Seq[Rating]): Seq[(Query, Actual)] = {
 
+    val allMids: Vector[String]  = ratings.map(_.mindex.toString)
+      .distinct
+      .sortBy(identity)
+      .toVector
 
     users.map{ case (uindex, user) => {
 
@@ -102,7 +106,7 @@ class MovieDataSource(params: MovieDataSourceParams)
       val mids:Seq[String] = uRatings.map(rating => rating.mindex.toString)
 
       val query = Query(uid = user.uid, mids = mids, top = Seq(), mtypes = Seq(), display = Seq())
-      val actual = Actual(ratings = uRatings)
+      val actual = Actual(ratings = uRatings, servedMids = allMids)
       (query, actual)
       }}
       .toSeq

@@ -6,10 +6,18 @@ import io.prediction.engines.base.MetricsHelper
 import io.prediction.engines.base.MetricsOutput
 import io.prediction.controller.Metrics
 import io.prediction.controller.Params
+
 import io.prediction.engines.base.HasName
+import scala.util.hashing.MurmurHash3
+import scala.collection.immutable.NumericRange
+import scala.collection.immutable.Range
+import io.prediction.engines.base.Stats
 
+import scala.util.Random
+import scala.collection.mutable.{ HashSet => MHashSet }
+import scala.collection.immutable.HashSet
 
-class MovieRecMetrics (
+class MovieRecMetricsParams (
   val name: String = "",
   val buckets: Int = 10,
   val ratingParams: BinaryRatingParams, //only need goodThreshold though
@@ -18,7 +26,7 @@ class MovieRecMetrics (
 ) extends Params {}
 
 object MeasureType extends Enumeration {
-  type = Value
+  type Type = Value
   val PrecisionAtK = Value
 }
 
@@ -48,10 +56,10 @@ class MovieRecPrecision(val k: Int, val ratingParams: BinaryRatingParams)
         actual.ratings
           .filter{
             r => {
-              r.rating >= binaryRatingParams.goodThreshold
+              r.rating >= ratingParams.goodThreshold
             }
           }
-          .map(_.mIndex)
+          .map(_.mindex)
           .toSet
       //MetricsHelper.actions2GoodIids(
       //actual.actionTuples, ratingParams)
@@ -59,7 +67,7 @@ class MovieRecPrecision(val k: Int, val ratingParams: BinaryRatingParams)
     // See how many good movies(mid) exist in actual are in prediction (in first kk movies)
     val relevantCount = prediction.movies.take(kk)
       .map(_._1)
-      .filter(mid => actualItems(mid))
+      .filter(mid => actualItems(mid.toInt))
       .size
 
     // The min value of the three values in the seq
@@ -105,12 +113,12 @@ class MovieRecMetrics(params: MovieRecMetricsParams)
     //val n = math.min(query.n, servedIids.size)
 
     val randMids = rand.shuffle(
-      (if (query.n > servedMids.size) {
+      (if (query.mids.size > servedMids.size) {
           // If too few items where served, use only the served items
           servedMids.toSet
         } else {
           val tempSet = MHashSet[String]()
-          while (tempSet.size < query.n) {
+          while (tempSet.size < query.mids.size) {
             tempSet.add(servedMids(rand.nextInt(query.mids.size)))
           }
           tempSet.toSet

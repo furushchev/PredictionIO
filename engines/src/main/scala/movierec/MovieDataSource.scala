@@ -86,7 +86,7 @@ class MovieDataSource(params: MovieDataSourceParams)
     *
     * It constructs a list of Query-Actual pair using the list of ratings.
     * For each user in the list, it creates a Query instance using all movies in
-    * ratings, and creates an Actual instance with all ratings associated with
+    * ratings, and creates an Actual instane with all ratings associated with
     * the user. Note that it is the metrics job to decide how to interprete the
     * semantics of the actions.
     */
@@ -95,7 +95,9 @@ class MovieDataSource(params: MovieDataSourceParams)
     movies: Map[Int, Movie],
     ratings: Seq[Rating]): Seq[(Query, Actual)] = {
 
+
     users.map{ case (uindex, user) => {
+
       val uRatings = ratings.filter(_.uindex == uindex)
       val mids:Seq[String] = uRatings.map(rating => rating.mindex.toString)
 

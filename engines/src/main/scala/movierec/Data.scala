@@ -13,7 +13,7 @@ case class Query (
 }
 
 case class Prediction (
-    // the ranked iid with score
+    // the ranked mid with score
     val movies: Seq[(String, Double)],
     val isOriginal: Boolean
   ) extends Serializable {
@@ -21,9 +21,11 @@ case class Prediction (
 }
 
 case class Actual(
-    // (uid, iid, action) - tuple
-    val actionTuples: Seq[(String, String, base.U2IActionTD)],
-    val servedIids: Vector[String]
+    // (uid, mid, action) - tuple
+    //val actionTuples: Seq[(String, String, base.U2IActionTD)],
+    //val servedIids: Vector[String]
+    val ratings: Seq[Rating],
+    val servedMids: Vector[String]
   ) extends Serializable {
-  override def toString = s"Actual: [$actionTuples.size]"
+  override def toString = s"${ratings}"
 }

@@ -52,17 +52,17 @@ class MovieDataSource(params: MovieDataSourceParams)
     val ratings = extractRatingsFromFile(params.ratingsFilePath, delim)
 
     log("DONE RATING FILE; here are the first 5 entries: ")
-    log(ratings.take(4))
+    log(ratings.take(4).toString)
 
     val users = extractUsersFromFile(params.usersFilePath, delim)
 
     log("DONE USERS FILE; here are the first 5 entries: ")
-    log(users.take(4))
+    log(users.take(4).toString)
 
     val movies = extractMoviesFromFile(params.moviesFilePath, delim)
 
     log("DONE MOVIES FILE; here are the first 5 entries: ")
-    log(movies.take(4))
+    log(movies.take(4).toString)
 
     if (params.actualRatio.isEmpty) {
       Seq((null.asInstanceOf[EmptyParams],
@@ -95,12 +95,11 @@ class MovieDataSource(params: MovieDataSourceParams)
     movies: Map[Int, Movie],
     ratings: Seq[Rating]): Seq[(Query, Actual)] = {
 
-    users.map{ user => {
-      val uindex = user.uid.toInt
-      val mids = ratings.map(rating => if (rating.uindex == uindex) mindex.toString)
+    users.map{ case (uindex, user) => {
       val uRatings = ratings.filter(_.uindex == uindex)
+      val mids:Seq[String] = uRatings.map(rating => rating.mindex.toString)
 
-      val query = Query(uid = user.uid, mids = mids)
+      val query = Query(uid = user.uid, mids = mids, top = Seq(), mtypes = Seq(), display = Seq())
       val actual = Actual(ratings = uRatings)
       (query, actual)
       }}

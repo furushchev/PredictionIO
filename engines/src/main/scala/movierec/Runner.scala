@@ -26,9 +26,17 @@ object Runner {
 
     val pp = new EmptyParams()
 
-    /*val mp = new EmptyParams()
+    val mp = new MovieRecMetricsParams(
+      name = "",
+      buckets = 10,
+      ratingParams = new BinaryRatingParams(
+        actionsMap = Map(),
+        goodThreshold = 3),
+      measureType = MeasureType.PrecisionAtK,
+      measureK = 10
+    ) 
 
-    val mrp = new MovieRecAlgorithmParams(
+    /*val mrp = new MovieRecAlgorithmParams(
       threshold = Double.MinPositiveValue
     )*/
 
@@ -54,9 +62,9 @@ object Runner {
         batch = "Imagine: Local MovieRec Engine",
         verbose = 0),
       engine = engine,
-      engineParams = engineParams
-      //metricsClassOpt = Some(classOf[MovieRecMetrics]),
-      //metricsParams = mp
+      engineParams = engineParams,
+      metricsClassOpt = Some(classOf[MovieRecMetrics]),
+      metricsParams = mp
     )
   }
 }

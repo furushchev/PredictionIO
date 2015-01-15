@@ -3,6 +3,7 @@ package io.prediction.engines.movierec
 import io.prediction.controller.EmptyParams
 import io.prediction.controller.Params
 import io.prediction.controller.LDataSource
+import io.prediction.engines.base.HasName
 import scala.io.Source
 import scala.collection.mutable.ListBuffer
 
@@ -35,7 +36,7 @@ case class EvalParams(
 class MovieDataSource(params: MovieDataSourceParams)
   extends LDataSource[
     MovieDataSourceParams,
-    EmptyParams,
+    HasName,
     TrainingData,
     Query,
     Actual] {
@@ -44,7 +45,7 @@ class MovieDataSource(params: MovieDataSourceParams)
   def log(str: String) = if (DEBUG) println(str)
 
   override
-  def read(): Seq[(EmptyParams, TrainingData, Seq[(Query, Actual)])] = {
+  def read(): Seq[(HasName, TrainingData, Seq[(Query, Actual)])] = {
     val delim = "[\t|]"
 
     log("START READING FILES")
@@ -65,7 +66,7 @@ class MovieDataSource(params: MovieDataSourceParams)
     log(movies.take(4).toString)
 
     if (params.actualRatio.isEmpty) {
-      Seq((null.asInstanceOf[EmptyParams],
+      Seq((null.asInstanceOf[HasName],
           new TrainingData(ratings, users, movies),
           Seq[(Query, Actual)]()))
     } else { // TODO: for evaluation, not tested
@@ -75,7 +76,7 @@ class MovieDataSource(params: MovieDataSourceParams)
       val usize = (users.size * testingRatio).toInt
       val msize = (movies.size * testingRatio).toInt
       // split data using take and drop
-      Seq((null.asInstanceOf[EmptyParams],
+      Seq((null.asInstanceOf[HasName],
           new TrainingData(ratings.drop(rsize), users.drop(usize), movies.drop(msize)),
           generateQueryActualSeq(users.take(usize), movies.take(usize), ratings.take(msize))))
     }

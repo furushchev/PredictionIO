@@ -1,7 +1,6 @@
 package io.prediction.engines.movierec
 
-import io.prediction.controller.IEngineFactory
-import io.prediction.controller.Engine
+import io.prediction.controller.{LAlgorithm, Params, IEngineFactory, Engine}
 
 object MovieRecEngine extends IEngineFactory {
   def apply() = {
@@ -9,7 +8,7 @@ object MovieRecEngine extends IEngineFactory {
       //classOf[EventsDataSource],
       classOf[MovieDataSource],
       classOf[MovieRecPreparator],
-      Map(
+      Map[String, Class[_ <: LAlgorithm[_ <: Params, PreparedData, _, Query, Prediction]]] (
         "rand" -> classOf[RandomAlgorithm],
         "movierec" -> classOf[MovieRecAlgorithm],
         "featurebased" -> classOf[FeatureBasedAlgorithm]
